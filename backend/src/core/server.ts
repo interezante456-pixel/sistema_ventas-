@@ -1,3 +1,4 @@
+// Archivo: src/core/server.ts
 import express, { Application } from 'express';
 import cors from 'cors';
 import { connectDB } from '../config/db';
@@ -17,7 +18,7 @@ export class Server {
         this.connect();
         this.middlewares();
         this.routes();
-        // Error handler should be last
+        // El manejador de errores debe ir al final
         this.app.use(errorHandler);
     }
 
@@ -36,7 +37,11 @@ export class Server {
 
     public listen() {
         this.app.listen(this.port, () => {
-            logger.info(`Server running on port ${this.port}`);
+            // 👇 AQUÍ ESTÁ EL MENSAJE QUE QUIERES VER 👇
+            console.log('\n'); // Un salto de línea para que se vea ordenado
+            logger.info(`🚀 Servidor corriendo exitosamente en el puerto ${this.port}`);
+            logger.info(`🔗 URL Base: http://localhost:${this.port}/api`);
+            console.log('\n');
         });
     }
 }

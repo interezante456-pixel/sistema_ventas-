@@ -14,7 +14,7 @@ class SalesController {
     async getById(req: Request, res: Response) {
         try {
             const sale = await salesService.getById(Number(req.params.id));
-            if (!sale) return res.status(404).json({ error: 'Sale not found' });
+            if (!sale) return res.status(404).json({ error: 'Venta no encontrada' });
             res.json(sale);
         } catch (error: any) {
             res.status(500).json({ error: error.message });
@@ -23,10 +23,21 @@ class SalesController {
 
     async create(req: Request, res: Response) {
         try {
-            // Ensure usuarioId is attached from the token/session
-            const data = { ...req.body, usuarioId: (req as any).user.id };
+            // Asumimos que el middleware verifyToken agrega el usuario a req
+            const userId = (req as any).user.id; 
+            const data = { ...req.body, usuarioId: userId };
+            
             const sale = await salesService.create(data);
             res.status(201).json(sale);
+        } catch (error: any) {
+            res.status(400).json({ error: error.message });
+        }
+    }
+
+    async cancel(req: Request, res: Response) {
+        try {
+            const sale = await salesService.cancelSale(Number(req.params.id));
+            res.json({ message: 'Venta anulada correctamente', sale });
         } catch (error: any) {
             res.status(400).json({ error: error.message });
         }

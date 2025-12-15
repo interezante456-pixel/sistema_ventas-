@@ -24,6 +24,11 @@ class CategoriesService {
             data: { estado: false },
         });
     }
+    async getById(id: number) {
+    return await prisma.categoria.findUnique({
+        where: { id },
+    });
+}
 }
 
 export default new CategoriesService();

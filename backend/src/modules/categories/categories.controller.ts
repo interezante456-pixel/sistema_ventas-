@@ -21,6 +21,11 @@ class CategoriesController {
         await categoriesService.delete(Number(req.params.id));
         res.json({ message: 'Category deleted' });
     }
+    async getById(req: Request, res: Response) {
+    const category = await categoriesService.getById(Number(req.params.id));
+    if (!category) return res.status(404).json({ error: 'Category not found' });
+    res.json(category);
+}
 }
 
 export default new CategoriesController();

@@ -146,6 +146,9 @@ model Venta {
   fechaVenta      DateTime        @default(now())
   total           Decimal         @db.Decimal(10, 2)
 
+  // 👇 AGREGA ESTA LÍNEA 👇
+  estado          String          @default("COMPLETADO")
+  
   clienteId Int?
   cliente   Cliente? @relation(fields: [clienteId], references: [id])
 

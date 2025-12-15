@@ -16,7 +16,7 @@ interface CreateVentaInput {
     total: number;
     detalles: VentaDetalleInput[];
     metodoPago: MetodoPago;
-    montoPago: number; // For the Pago record
+    montoPago: number;
 }
 
 class SalesService {
@@ -50,7 +50,18 @@ class SalesService {
 
     async create(data: CreateVentaInput) {
         return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-            // 1. Create Venta
+            // 1. Validar Stock ANTES de crear nada
+            for (const item of data.detalles) {
+                const producto = await tx.producto.findUnique({ where: { id: item.productoId } });
+                
+                if (!producto) throw new Error(`Producto ${item.productoId} no existe`);
+                if (!producto.estado) throw new Error(`Producto ${producto.nombre} está desactivado`);
+                if (producto.stock < item.cantidad) {
+                    throw new Error(`Stock insuficiente para ${producto.nombre}. Disponible: ${producto.stock}`);
+                }
+            }
+
+            // 2. Crear Venta
             const venta = await tx.venta.create({
                 data: {
                     tipoComprobante: data.tipoComprobante,
@@ -58,10 +69,11 @@ class SalesService {
                     usuarioId: data.usuarioId,
                     clienteId: data.clienteId,
                     fechaVenta: new Date(),
+                    estado: 'COMPLETADO' // Nos aseguramos que nazca activa
                 },
             });
 
-            // 2. Create Detalles
+            // 3. Crear Detalles y Mover Stock
             for (const item of data.detalles) {
                 await tx.ventaDetalle.create({
                     data: {
@@ -74,12 +86,13 @@ class SalesService {
                     },
                 });
 
-                // 3. Update Stock and Create Movement
+                // Disminuir Stock
                 await tx.producto.update({
                     where: { id: item.productoId },
                     data: { stock: { decrement: item.cantidad } },
                 });
 
+                // Registrar Kardex (Salida)
                 await tx.movimientoStock.create({
                     data: {
                         tipo: TipoMovimiento.SALIDA,
@@ -90,7 +103,7 @@ class SalesService {
                 });
             }
 
-            // 4. Create Pago
+            // 4. Registrar Pago
             await tx.pago.create({
                 data: {
                     ventaId: venta.id,
@@ -100,6 +113,43 @@ class SalesService {
             });
 
             return venta;
+        });
+    }
+
+    async cancelSale(id: number) {
+        return await prisma.$transaction(async (tx) => {
+            // 1. Buscar venta
+            const venta = await tx.venta.findUnique({
+                where: { id },
+                include: { detalles: true }
+            });
+
+            if (!venta) throw new Error("Venta no encontrada");
+            if (venta.estado === 'ANULADO') throw new Error("Esta venta ya fue anulada");
+
+            // 2. Devolver Stock (Reversa)
+            for (const detalle of venta.detalles) {
+                await tx.producto.update({
+                    where: { id: detalle.productoId },
+                    data: { stock: { increment: detalle.cantidad } }
+                });
+
+                // Registrar Kardex (Entrada por anulación)
+                await tx.movimientoStock.create({
+                    data: {
+                        tipo: TipoMovimiento.ENTRADA,
+                        cantidad: detalle.cantidad,
+                        motivo: `Anulación Venta #${venta.id}`,
+                        productoId: detalle.productoId
+                    }
+                });
+            }
+
+            // 3. Cambiar estado a ANULADO
+            return await tx.venta.update({
+                where: { id },
+                data: { estado: 'ANULADO' }
+            });
         });
     }
 }
