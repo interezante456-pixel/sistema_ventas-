@@ -1,0 +1,194 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 2. Enums (Tus listas de opciones fijas)
+enum Rol {
+  ADMIN
+  VENDEDOR
+  ALMACEN
+}
+
+enum TipoComprobante {
+  BOLETA
+  FACTURA
+}
+
+enum MetodoPago {
+  EFECTIVO
+  TARJETA
+  YAPE
+  PLIN
+  TRANSFERENCIA
+}
+
+enum TipoMovimiento {
+  ENTRADA
+  SALIDA
+}
+
+// 3. Modelos (Tablas)
+
+model Usuario {
+  id            Int      @id @default(autoincrement())
+  nombre        String
+  usuario       String   @unique
+  password      String
+  rol           Rol
+  estado        Boolean  @default(true)
+  fechaCreacion DateTime @default(now())
+
+  // Relaciones
+  compras Compra[]
+  ventas  Venta[]
+}
+
+model Cliente {
+  id            Int      @id @default(autoincrement())
+  dniRuc        String?  @unique
+  nombres       String
+  direccion     String?
+  telefono      String?
+  email         String?
+  estado        Boolean  @default(true)
+  fechaRegistro DateTime @default(now())
+
+  ventas Venta[]
+}
+
+model Categoria {
+  id          Int     @id @default(autoincrement())
+  nombre      String
+  descripcion String?
+  estado      Boolean @default(true)
+
+  productos Producto[]
+}
+
+model Proveedor {
+  id        Int     @id @default(autoincrement())
+  ruc       String? @unique
+  nombre    String
+  telefono  String?
+  direccion String?
+  email     String?
+  estado    Boolean @default(true)
+
+  compras Compra[]
+}
+
+model Producto {
+  id           Int     @id @default(autoincrement())
+  codigo       String  @unique
+  nombre       String
+  descripcion  String?
+  precioCompra Decimal @db.Decimal(10, 2)
+  precioVenta  Decimal @db.Decimal(10, 2)
+  stock        Int
+  estado       Boolean @default(true)
+
+  // Relaciones
+  categoriaId Int
+  categoria   Categoria @relation(fields: [categoriaId], references: [id])
+
+  detalleCompras CompraDetalle[]
+  detalleVentas  VentaDetalle[]
+  movimientos    MovimientoStock[]
+}
+
+// --- MÓDULO DE COMPRAS ---
+
+model Compra {
+  id          Int      @id @default(autoincrement())
+  fechaCompra DateTime @default(now())
+  total       Decimal  @db.Decimal(10, 2)
+
+  proveedorId Int
+  proveedor   Proveedor @relation(fields: [proveedorId], references: [id])
+
+  usuarioId Int
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+
+  detalles CompraDetalle[]
+}
+
+model CompraDetalle {
+  id       Int     @id @default(autoincrement())
+  cantidad Int
+  precio   Decimal @db.Decimal(10, 2)
+  subtotal Decimal @db.Decimal(10, 2)
+
+  compraId Int
+  compra   Compra @relation(fields: [compraId], references: [id])
+
+  productoId Int
+  producto   Producto @relation(fields: [productoId], references: [id])
+}
+
+// --- MÓDULO DE VENTAS ---
+
+model Venta {
+  id              Int             @id @default(autoincrement())
+  tipoComprobante TipoComprobante
+  serie           String?
+  numero          String?
+  fechaVenta      DateTime        @default(now())
+  total           Decimal         @db.Decimal(10, 2)
+
+  clienteId Int?
+  cliente   Cliente? @relation(fields: [clienteId], references: [id])
+
+  usuarioId Int
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+
+  detalles VentaDetalle[]
+  pagos    Pago[]
+}
+
+model VentaDetalle {
+  id        Int     @id @default(autoincrement())
+  cantidad  Int
+  precio    Decimal @db.Decimal(10, 2)
+  descuento Decimal @default(0) @db.Decimal(10, 2)
+  subtotal  Decimal @db.Decimal(10, 2)
+
+  ventaId Int
+  venta   Venta @relation(fields: [ventaId], references: [id])
+
+  productoId Int
+  producto   Producto @relation(fields: [productoId], references: [id])
+}
+
+model Pago {
+  id         Int        @id @default(autoincrement())
+  metodoPago MetodoPago
+  monto      Decimal    @db.Decimal(10, 2)
+  fechaPago  DateTime   @default(now())
+
+  ventaId Int
+  venta   Venta @relation(fields: [ventaId], references: [id])
+}
+
+// --- MÓDULO DE KARDEX / STOCK ---
+
+model MovimientoStock {
+  id       Int            @id @default(autoincrement())
+  tipo     TipoMovimiento
+  cantidad Int
+  motivo   String?
+  fecha    DateTime       @default(now())
+
+  productoId Int
+  producto   Producto @relation(fields: [productoId], references: [id])
+}
