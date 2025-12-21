@@ -22,21 +22,27 @@ class ProductsController {
         }
     }
 
-    // 👇 MÉTODO CORREGIDO (CONVERSIÓN DE DATOS)
     async create(req: Request, res: Response) {
         try {
-            // Convertimos los strings a números antes de enviarlos al servicio
+            // Construimos la URL de la imagen si se subió un archivo
+            let imagenUrl = '';
+            if (req.file) {
+                // Ejemplo: http://localhost:4000/uploads/foto-123.jpg
+                imagenUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+            } else if (req.body.imagenUrl) {
+                // Si no subió archivo pero mandó un link de internet
+                imagenUrl = req.body.imagenUrl;
+            }
+
             const data = {
-                codigo: req.body.codigo, // String
-                nombre: req.body.nombre, // String
-                descripcion: req.body.descripcion, // String (opcional)
-                imagenUrl: req.body.imagenUrl, // String (opcional)
+                codigo: req.body.codigo,
+                nombre: req.body.nombre,
+                descripcion: req.body.descripcion,
+                imagenUrl: imagenUrl, // 👈 Usamos la URL generada
                 
-                // Convertimos "10.50" -> 10.50
+                // Multer convierte todo a texto, así que SIEMPRE parseamos
                 precioCompra: parseFloat(req.body.precioCompra),
                 precioVenta: parseFloat(req.body.precioVenta),
-                
-                // Convertimos "15" -> 15
                 stock: parseInt(req.body.stock),
                 categoriaId: parseInt(req.body.categoriaId)
             };
@@ -44,24 +50,22 @@ class ProductsController {
             const product = await productsService.create(data);
             res.status(201).json(product);
         } catch (error: any) {
-            // Manejo especial si el código de barras ya existe
-            if (error.code === 'P2002') {
-                return res.status(400).json({ error: 'El código del producto ya existe' });
-            }
-            console.error(error);
-            res.status(400).json({ error: error.message || 'Error al crear producto' });
+            if (error.code === 'P2002') return res.status(400).json({ error: 'Código duplicado' });
+            res.status(400).json({ error: error.message });
         }
     }
 
-    // 👇 MÉTODO CORREGIDO (CONVERSIÓN CONDICIONAL)
     async update(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            
-            // Copiamos el body original
             const data: any = { ...req.body };
 
-            // Solo convertimos si el dato existe en la petición
+            // Si hay nueva imagen, actualizamos la URL
+            if (req.file) {
+                data.imagenUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+            }
+
+            // Conversiones necesarias
             if (req.body.stock) data.stock = parseInt(req.body.stock);
             if (req.body.categoriaId) data.categoriaId = parseInt(req.body.categoriaId);
             if (req.body.precioCompra) data.precioCompra = parseFloat(req.body.precioCompra);
@@ -70,8 +74,7 @@ class ProductsController {
             const product = await productsService.update(Number(id), data);
             res.json(product);
         } catch (error: any) {
-            console.error(error);
-            res.status(400).json({ error: error.message || 'Error al actualizar producto' });
+            res.status(400).json({ error: error.message });
         }
     }
 
