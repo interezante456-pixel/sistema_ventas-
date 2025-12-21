@@ -1,13 +1,71 @@
-import React from 'react'
-import Sidebar from '@/components/common/Sidebar'
+import { Outlet, Link, useLocation } from "react-router-dom";
+import { LayoutDashboard, ShoppingCart, Package, Users, LogOut, Menu } from "lucide-react";
+import { useState } from "react";
 
-const DashboardLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+export default function DashboardLayout() {
+  const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const navItems = [
+    { href: "/", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/pos", label: "Punto de Venta", icon: ShoppingCart },
+    { href: "/products", label: "Productos", icon: Package },
+    { href: "/users", label: "Usuarios", icon: Users },
+  ];
+
   return (
-    <div className="min-h-screen flex">
-      <Sidebar />
-      <main className="flex-1 p-4">{children}</main>
-    </div>
-  )
-}
+    <div className="flex h-screen bg-gray-100">
+      {/* Sidebar Desktop */}
+      <aside className="hidden md:flex flex-col w-64 bg-white border-r">
+        <div className="p-6 flex items-center gap-2">
+          <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold">SV</span>
+          </div>
+          <h1 className="text-xl font-bold text-gray-800">Sistema Ventas</h1>
+        </div>
 
-export default DashboardLayout
+        <nav className="flex-1 px-4 space-y-1">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                to={item.href}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  isActive 
+                    ? "bg-blue-50 text-blue-700 font-medium" 
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                }`}
+              >
+                <item.icon size={20} />
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="p-4 border-t">
+          <button className="flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50 w-full rounded-lg transition-colors">
+            <LogOut size={20} />
+            <span>Cerrar Sesión</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto">
+        {/* Header Mobile */}
+        <header className="md:hidden bg-white p-4 flex items-center justify-between border-b">
+            <h1 className="font-bold text-gray-800">Sistema Ventas</h1>
+            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+                <Menu className="text-gray-600" />
+            </button>
+        </header>
+        
+        <div className="p-8">
+          <Outlet />
+        </div>
+      </main>
+    </div>
+  );
+}

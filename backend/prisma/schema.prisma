@@ -93,11 +93,13 @@ model Producto {
   codigo       String  @unique
   nombre       String
   descripcion  String?
+  imagenUrl   String?
+  
   precioCompra Decimal @db.Decimal(10, 2)
   precioVenta  Decimal @db.Decimal(10, 2)
   stock        Int
   estado       Boolean @default(true)
-
+  
   // Relaciones
   categoriaId Int
   categoria   Categoria @relation(fields: [categoriaId], references: [id])
