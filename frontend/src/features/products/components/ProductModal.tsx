@@ -10,9 +10,10 @@ interface ProductModalProps {
 }
 
 export const ProductModal = ({ isOpen, onClose, onSuccess, productToEdit }: ProductModalProps) => {
+  // 👇 AQUÍ AGREGUÉ 'imagenUrl' PARA QUE TYPESCRIPT NO SE QUEJE
   const [formData, setFormData] = useState({
     codigo: '', nombre: '', descripcion: '', 
-    precioCompra: '', precioVenta: '', stock: '', categoriaId: ''
+    precioCompra: '', precioVenta: '', stock: '', categoriaId: '', imagenUrl: ''
   });
   
   // Estados para la imagen
@@ -34,11 +35,16 @@ export const ProductModal = ({ isOpen, onClose, onSuccess, productToEdit }: Prod
         precioCompra: productToEdit.precioCompra,
         precioVenta: productToEdit.precioVenta,
         stock: productToEdit.stock,
-        categoriaId: productToEdit.categoriaId
+        categoriaId: productToEdit.categoriaId,
+        imagenUrl: productToEdit.imagenUrl || ''
       });
       setPreviewUrl(productToEdit.imagenUrl || '');
     } else {
-      setFormData({ codigo: '', nombre: '', descripcion: '', precioCompra: '', precioVenta: '', stock: '', categoriaId: '' });
+      setFormData({ 
+        codigo: '', nombre: '', descripcion: '', 
+        precioCompra: '', precioVenta: '', stock: '', 
+        categoriaId: '', imagenUrl: '' 
+      });
       setPreviewUrl('');
       setSelectedFile(null);
     }
@@ -55,7 +61,7 @@ export const ProductModal = ({ isOpen, onClose, onSuccess, productToEdit }: Prod
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setSelectedFile(file);
-      setPreviewUrl(URL.createObjectURL(file)); // Previsualización local inmediata
+      setPreviewUrl(URL.createObjectURL(file)); 
     }
   };
 
@@ -74,19 +80,23 @@ export const ProductModal = ({ isOpen, onClose, onSuccess, productToEdit }: Prod
 
     if (selectedFile) {
         data.append('imagen', selectedFile);
+    } else {
+        // Si no hay archivo nuevo, enviamos la URL anterior para no perderla
+        // (o enviamos cadena vacía si no había nada)
+        data.append('imagenUrl', formData.imagenUrl || '');
     }
 
     try {
-      const config = { headers: { 'Content-Type': 'multipart/form-data' } };
-      
+      // ✅ Axios pone el Content-Type correcto automáticamente con FormData
       if (productToEdit) {
-        await api.patch(`/products/${productToEdit.id}`, data, config);
+        await api.patch(`/products/${productToEdit.id}`, data);
       } else {
-        await api.post('/products', data, config);
+        await api.post('/products', data);
       }
       onSuccess();
       onClose();
     } catch (err: any) {
+      console.error(err);
       setError(err.response?.data?.error || 'Error al guardar');
     } finally {
       setLoading(false);
@@ -110,19 +120,18 @@ export const ProductModal = ({ isOpen, onClose, onSuccess, productToEdit }: Prod
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && <div className="bg-red-50 text-red-600 p-3 rounded text-sm border border-red-200">{error}</div>}
 
-          {/* Inputs de Código y Categoría */}
+          {/* Código y Categoría */}
           <div className="grid grid-cols-2 gap-4">
              <div className="col-span-1">
                 <label className="block text-xs font-bold text-gray-700 mb-1">Código</label>
                 <div className="relative">
                     <Hash className="absolute left-3 top-2.5 text-gray-400" size={16} />
                     <input 
-                      type="text" 
-                      required 
+                      type="text" required 
                       className="pl-9 w-full border rounded-lg py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
                       value={formData.codigo} 
                       onChange={e => setFormData({...formData, codigo: e.target.value})} 
-                      placeholder="Ej: 7750123" // 👈 Placeholder agregado
+                      placeholder="Ej: 7750123"
                     />
                 </div>
              </div>
@@ -147,21 +156,18 @@ export const ProductModal = ({ isOpen, onClose, onSuccess, productToEdit }: Prod
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1">Nombre</label>
             <input 
-              type="text" 
-              required 
+              type="text" required 
               className="w-full border rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
               value={formData.nombre} 
               onChange={e => setFormData({...formData, nombre: e.target.value})} 
-              placeholder="Ej: Gaseosa Coca Cola 1.5L" // 👈 Placeholder agregado
+              placeholder="Ej: Gaseosa Coca Cola 1.5L"
             />
           </div>
 
-          {/* Sección de Imagen */}
+          {/* Imagen */}
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1">Imagen del Producto</label>
             <div className="flex gap-4 items-start">
-                
-                {/* Cuadro de Previsualización */}
                 <div className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50 overflow-hidden relative group">
                     {previewUrl ? (
                         <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
@@ -169,8 +175,6 @@ export const ProductModal = ({ isOpen, onClose, onSuccess, productToEdit }: Prod
                         <ImageIcon className="text-gray-400" size={32} />
                     )}
                 </div>
-
-                {/* Botón de carga */}
                 <div className="flex-1">
                     <input 
                         type="file" 
@@ -192,41 +196,36 @@ export const ProductModal = ({ isOpen, onClose, onSuccess, productToEdit }: Prod
             </div>
           </div>
 
-          {/* Inputs de Precio y Stock */}
+          {/* Precios y Stock */}
            <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-700 mb-1">P. Compra</label>
               <input 
-                type="number" 
-                step="0.01" 
-                required 
+                type="number" step="0.01" required 
                 className="w-full border rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
                 value={formData.precioCompra} 
                 onChange={e => setFormData({...formData, precioCompra: e.target.value})} 
-                placeholder="0.00" // 👈 Placeholder agregado
+                placeholder="0.00"
               />
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 mb-1">P. Venta</label>
               <input 
-                type="number" 
-                step="0.01" 
-                required 
+                type="number" step="0.01" required 
                 className="w-full border rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
                 value={formData.precioVenta} 
                 onChange={e => setFormData({...formData, precioVenta: e.target.value})} 
-                placeholder="0.00" // 👈 Placeholder agregado
+                placeholder="0.00"
               />
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 mb-1">Stock</label>
               <input 
-                type="number" 
-                required 
+                type="number" required 
                 className="w-full border rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
                 value={formData.stock} 
                 onChange={e => setFormData({...formData, stock: e.target.value})} 
-                placeholder="0" // 👈 Placeholder agregado
+                placeholder="0"
               />
             </div>
           </div>

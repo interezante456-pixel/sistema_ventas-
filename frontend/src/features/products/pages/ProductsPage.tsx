@@ -1,21 +1,25 @@
 import { useEffect, useState } from 'react';
-import { Package, Plus, Search, Edit, Trash2 } from 'lucide-react';
+import { Package, Plus, Search, Edit, Trash2, Eye } from 'lucide-react'; // 👈 IMPORTA "Eye"
 import api from '../../../config/api';
 import { ProductModal } from '../components/ProductModal';
-import { ConfirmModal } from '../../users/components/ConfirmModal'; // Reutilizamos el que ya tienes
-import { ToastNotification } from '../../users/components/ToastNotification'; // Reutilizamos
+import { ConfirmModal } from '../../users/components/ConfirmModal';
+import { ToastNotification } from '../../users/components/ToastNotification';
+import { ProductViewModal } from '../components/ProductViewModal'; // 👈 IMPORTA EL NUEVO MODAL
 
 export const ProductsPage = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   
-  // Estados para modales
+  // Modales existentes
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState<any>(null);
-  
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<number | null>(null);
+  
+  // 👇 NUEVOS ESTADOS PARA EL VISOR
+  const [isViewOpen, setIsViewOpen] = useState(false);
+  const [productToView, setProductToView] = useState<any>(null);
 
   const [toast, setToast] = useState<{msg: string, type: 'success' | 'error'} | null>(null);
 
@@ -45,7 +49,6 @@ export const ProductsPage = () => {
     }
   };
 
-  // Filtrar productos por búsqueda
   const filteredProducts = products.filter(p => 
     p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) || 
     p.codigo.toLowerCase().includes(searchTerm.toLowerCase())
@@ -69,7 +72,6 @@ export const ProductsPage = () => {
 
       {/* Buscador y Tabla */}
       <div className="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
-        {/* Barra de Búsqueda */}
         <div className="p-4 border-b bg-gray-50">
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
@@ -83,7 +85,6 @@ export const ProductsPage = () => {
           </div>
         </div>
 
-        {/* Tabla */}
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-gray-100 text-gray-700 uppercase font-bold text-xs">
@@ -103,15 +104,29 @@ export const ProductsPage = () => {
                 <tr><td colSpan={6} className="text-center py-8 text-gray-500">No hay productos registrados.</td></tr>
               ) : (
                 filteredProducts.map((product) => (
-                  <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={product.id} className="hover:bg-gray-50 transition-colors group">
                     <td className="px-6 py-4 font-mono text-gray-600">{product.codigo}</td>
-                    <td className="px-6 py-4 font-medium text-gray-900">{product.nombre}</td>
+                    
+                    {/* Nombre + Mini Imagen */}
                     <td className="px-6 py-4">
-                      <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-semibold">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center overflow-hidden shrink-0">
+                             {product.imagenUrl ? (
+                                <img src={product.imagenUrl} alt="" className="w-full h-full object-cover"/>
+                             ) : (
+                                <Package size={16} className="text-gray-400"/>
+                             )}
+                        </div>
+                        <span className="font-medium text-gray-900">{product.nombre}</span>
+                      </div>
+                    </td>
+
+                    <td className="px-6 py-4">
+                      <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-semibold border border-blue-100">
                         {product.categoria?.nombre || 'Sin Cat.'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right font-bold text-green-600">
+                    <td className="px-6 py-4 text-right font-bold text-gray-700">
                       S/ {Number(product.precioVenta).toFixed(2)}
                     </td>
                     <td className="px-6 py-4 text-center">
@@ -119,19 +134,37 @@ export const ProductsPage = () => {
                         {product.stock} un.
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-center flex justify-center gap-2">
-                      <button 
-                        onClick={() => { setProductToEdit(product); setIsModalOpen(true); }}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                      >
-                        <Edit size={18} />
-                      </button>
-                      <button 
-                        onClick={() => { setProductToDelete(product.id); setIsConfirmOpen(true); }}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                    <td className="px-6 py-4 text-center">
+                      <div className="flex justify-center gap-2">
+                        
+                        {/* 1. BOTÓN VER DETALLE (NUEVO) */}
+                        <button 
+                          onClick={() => { setProductToView(product); setIsViewOpen(true); }}
+                          className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Ver detalle"
+                        >
+                          <Eye size={18} />
+                        </button>
+
+                        {/* 2. EDITAR */}
+                        <button 
+                          onClick={() => { setProductToEdit(product); setIsModalOpen(true); }}
+                          className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                          title="Editar"
+                        >
+                          <Edit size={18} />
+                        </button>
+
+                        {/* 3. ELIMINAR */}
+                        <button 
+                          onClick={() => { setProductToDelete(product.id); setIsConfirmOpen(true); }}
+                          className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Eliminar"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -156,6 +189,13 @@ export const ProductsPage = () => {
         title="¿Eliminar Producto?"
         message="Esta acción eliminará el producto del inventario permanentemente."
         isDelete={true}
+      />
+
+      {/* 👇 AQUÍ RENDERIZAMOS EL NUEVO MODAL DE VISTA */}
+      <ProductViewModal 
+        isOpen={isViewOpen}
+        onClose={() => setIsViewOpen(false)}
+        product={productToView}
       />
 
       {toast && <ToastNotification message={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
