@@ -1,15 +1,27 @@
-import { Outlet, Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, ShoppingCart, Package, Users, LogOut, Menu } from "lucide-react";
+import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
+import { LayoutDashboard, ShoppingCart, Package, Users, LogOut, Menu, FileText } from "lucide-react";
 import { useState } from "react";
+import { useAuthStore } from "@/store/auth.store"; // Asegúrate de importar tu store
 
 export default function DashboardLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  // Lógica de Logout
+  const logout = useAuthStore((state: any) => state.logout);
+  const handleLogout = () => {
+    if (logout) logout();
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
 
-  const navItems = [
+ const navItems = [
     { href: "/", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/pos", label: "Punto de Venta", icon: ShoppingCart },
-    { href: "/products", label: "Productos", icon: Package },
+    { href: "/pos", label: "Punto de Venta", icon: ShoppingCart }, // Coincide con path: "pos"
+    { href: "/products", label: "Productos", icon: Package },      // Coincide con path: "products"
+    { href: "/sales", label: "Historial Ventas", icon: FileText }, // Coincide con path: "sales"
     { href: "/users", label: "Usuarios", icon: Users },
   ];
 
@@ -45,7 +57,10 @@ export default function DashboardLayout() {
         </nav>
 
         <div className="p-4 border-t">
-          <button className="flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50 w-full rounded-lg transition-colors">
+          <button 
+            onClick={handleLogout} // <--- AQUÍ CONECTAMOS LA LÓGICA
+            className="flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50 w-full rounded-lg transition-colors cursor-pointer"
+          >
             <LogOut size={20} />
             <span>Cerrar Sesión</span>
           </button>
@@ -53,16 +68,17 @@ export default function DashboardLayout() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Header Mobile */}
-        <header className="md:hidden bg-white p-4 flex items-center justify-between border-b">
+        <header className="md:hidden bg-white p-4 flex items-center justify-between border-b shrink-0">
             <h1 className="font-bold text-gray-800">Sistema Ventas</h1>
             <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
                 <Menu className="text-gray-600" />
             </button>
         </header>
         
-        <div className="p-8">
+        {/* Contenido con scroll independiente */}
+        <div className="flex-1 overflow-y-auto p-8">
           <Outlet />
         </div>
       </main>

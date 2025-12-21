@@ -1,19 +1,29 @@
 import axios from 'axios';
-import { useAuthStore } from '@/store/auth.store';
+import { useAuthStore } from '@/store/auth.store'; 
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000/api', // Asegúrate que coincida con tu backend
+  baseURL: 'http://localhost:4000/api',
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Interceptor: Antes de enviar, poner el Token
+// Interceptor: Antes de enviar la petición...
 api.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().token;
+  // 1. Intentamos obtener el token del Store (Memoria)
+  let token = useAuthStore.getState().token;
+
+  // 2. Si NO hay token en el Store, lo buscamos en el LocalStorage (Navegador)
+  // (Esto arregla el error 401 al recargar la página)
+  if (!token) {
+    token = localStorage.getItem('token');
+  }
+
+  // 3. Si encontramos un token, lo pegamos en la cabecera
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  
   return config;
 });
 

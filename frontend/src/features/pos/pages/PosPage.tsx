@@ -1,10 +1,8 @@
-import React from 'react';
-
-export default function PosPage() {
+export const PosPage = () => {
   return (
-    <div className="p-6">
+    <div className="p-4">
       <h1 className="text-2xl font-bold">Punto de Venta</h1>
-      <p>Aquí irá el lector de barras</p>
+      <p>Aquí irá el módulo de facturación.</p>
     </div>
   );
-}
+};

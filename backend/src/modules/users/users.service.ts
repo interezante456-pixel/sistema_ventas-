@@ -3,9 +3,16 @@ import bcrypt from 'bcryptjs';
 
 class UsersService {
     async getAll() {
-        return await prisma.usuario.findMany({
-            where: { estado: true },
+        console.log("📢 Buscando usuarios en la BD...");
+        
+        const usuarios = await prisma.usuario.findMany({
+            orderBy: { id: 'asc' }
         });
+
+        console.log(`✅ Encontrados: ${usuarios.length} usuarios`);
+        console.log(usuarios); // Muestra la lista en la consola negra
+        
+        return usuarios;
     }
 
     async getById(id: number) {

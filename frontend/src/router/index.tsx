@@ -1,29 +1,56 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
-import DashboardLayout from '@/layouts/DashboardLayout';
-import PosPage from '@/features/pos/pages/PosPage'; // Ahora sí lo encontrará
+import { createBrowserRouter, Navigate } from "react-router-dom";
+import { LoginPage } from "../features/auth/LoginPage";
+import DashboardLayout from "../layouts/DashboardLayout";
+import { ProtectedRoute } from "./ProtectedRoute";
 
-// Componentes temporales
-const Login = () => <div className="h-screen flex items-center justify-center text-2xl font-bold">Login (Próximamente)</div>;
-const Products = () => <div className="p-10 text-xl text-gray-500">Gestión de Productos + Imágenes</div>;
-const Users = () => <div className="p-10 text-xl text-gray-500">Gestión de Usuarios</div>;
+// Importaciones adaptadas a tu estructura "features/modulo/pages/..."
+import { DashboardPage } from "../features/dashboard/DashboardPage";
+import { PosPage } from "../features/pos/pages/PosPage";         // <--- OJO AQUÍ
+import { ProductsPage } from "../features/products/pages/ProductsPage"; // <--- OJO AQUÍ
+import { SalesHistory } from "../features/sales/pages/SalesHistory";   // <--- OJO AQUÍ
+// import { UsersPage } from "../features/users/pages/UsersPage"; // Descomenta cuando crees la carpeta users
+import { UsersPage } from "../features/users/pages/UsersPage";
 
 export const router = createBrowserRouter([
-  { // 👈 TE FALTABA ESTA LLAVE
-    path: '/login',
-    element: <Login />,
+  {
+    path: "/login",
+    element: <LoginPage />,
   },
   {
-    path: '/',
-    element: <DashboardLayout />,
+    element: <ProtectedRoute />,
     children: [
-      { index: true, element: <Navigate to="/pos" replace /> },
-      { path: 'pos', element: <PosPage /> },
-      { path: 'products', element: <Products /> },
-      { path: 'users', element: <Users /> },
-    ],
+      {
+        path: "/",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <DashboardPage />,
+          },
+          // Rutas hijas
+          {
+            path: "pos",         // Ruta: /pos
+            element: <PosPage />,
+          },
+          {
+            path: "products",    // Ruta: /products
+            element: <ProductsPage />,
+          },
+          {
+            path: "sales",       // Ruta: /sales (Historial)
+            element: <SalesHistory />,
+          },
+          
+           {
+            path: "users",
+          element: <UsersPage />,
+          },
+        ]
+      }
+    ]
   },
   {
-    path: '*',
-    element: <Navigate to="/" replace />,
+    path: "*",
+    element: <Navigate to="/login" replace />,
   }
 ]);
