@@ -38,6 +38,7 @@ export default function DashboardLayout() {
     { href: "/products", label: "Productos", icon: Package },
     { href: "/sales", label: "Historial Ventas", icon: FileText },
     { href: "/users", label: "Usuarios", icon: Users },
+    { href: "/categories", label: "Categorías", icon: Package },
   ];
 
   return (

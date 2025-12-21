@@ -11,6 +11,9 @@ import { SalesHistory } from "../features/sales/pages/SalesHistory";   // <--- O
 // import { UsersPage } from "../features/users/pages/UsersPage"; // Descomenta cuando crees la carpeta users
 import { UsersPage } from "../features/users/pages/UsersPage";
 
+
+import { CategoriesPage } from '../features/categories/pages/CategoriesPage';
+
 export const router = createBrowserRouter([
   {
     path: "/login",
@@ -44,6 +47,10 @@ export const router = createBrowserRouter([
            {
             path: "users",
           element: <UsersPage />,
+          },
+          {
+            path: "categories",
+            element: <CategoriesPage />,
           },
         ]
       }
