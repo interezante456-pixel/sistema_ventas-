@@ -3,8 +3,8 @@ import prisma from '../../config/prisma';
 class ProductsService {
     async getAll() {
         return await prisma.producto.findMany({
-            where: { estado: true },
             include: { categoria: true },
+            orderBy: { id: 'desc' }
         });
     }
 

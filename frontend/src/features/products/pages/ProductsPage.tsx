@@ -1,23 +1,23 @@
 import { useEffect, useState } from 'react';
-import { Package, Plus, Search, Edit, Trash2, Eye } from 'lucide-react'; // 👈 IMPORTA "Eye"
+import { Package, Plus, Search, Edit, Trash2, Eye, RefreshCw, Activity } from 'lucide-react'; 
 import api from '../../../config/api';
 import { ProductModal } from '../components/ProductModal';
 import { ConfirmModal } from '../../users/components/ConfirmModal';
 import { ToastNotification } from '../../users/components/ToastNotification';
-import { ProductViewModal } from '../components/ProductViewModal'; // 👈 IMPORTA EL NUEVO MODAL
+import { ProductViewModal } from '../components/ProductViewModal';
 
 export const ProductsPage = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   
-  // Modales existentes
+  // Modales
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState<any>(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [productToDelete, setProductToDelete] = useState<number | null>(null);
+  const [productToDelete, setProductToDelete] = useState<any>(null);
   
-  // 👇 NUEVOS ESTADOS PARA EL VISOR
+  // Modal Vista
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [productToView, setProductToView] = useState<any>(null);
 
@@ -38,14 +38,18 @@ export const ProductsPage = () => {
     }
   };
 
-  const handleDelete = async () => {
+  const handleDeleteOrRestore = async () => {
     if (!productToDelete) return;
     try {
-      await api.delete(`/products/${productToDelete}`);
-      setToast({ msg: 'Producto eliminado correctamente', type: 'success' });
+      const nuevoEstado = !productToDelete.estado;
+      await api.patch(`/products/${productToDelete.id}`, { estado: nuevoEstado });
+      setToast({ 
+        msg: nuevoEstado ? 'Producto restaurado' : 'Producto eliminado', 
+        type: 'success' 
+      });
       fetchProducts();
     } catch (error) {
-      setToast({ msg: 'Error al eliminar producto', type: 'error' });
+      setToast({ msg: 'Error al procesar', type: 'error' });
     }
   };
 
@@ -56,7 +60,6 @@ export const ProductsPage = () => {
 
   return (
     <div className="space-y-6">
-      {/* Cabecera */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Inventario de Productos</h1>
@@ -70,7 +73,6 @@ export const ProductsPage = () => {
         </button>
       </div>
 
-      {/* Buscador y Tabla */}
       <div className="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
         <div className="p-4 border-b bg-gray-50">
           <div className="relative max-w-md">
@@ -94,20 +96,24 @@ export const ProductsPage = () => {
                 <th className="px-6 py-3">Categoría</th>
                 <th className="px-6 py-3 text-right">Precio Venta</th>
                 <th className="px-6 py-3 text-center">Stock</th>
+                {/* 👇 NUEVA COLUMNA ESTADO */}
+                <th className="px-6 py-3 text-center">Estado</th>
                 <th className="px-6 py-3 text-center">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 text-sm">
               {loading ? (
-                <tr><td colSpan={6} className="text-center py-8 text-gray-500">Cargando productos...</td></tr>
+                <tr><td colSpan={7} className="text-center py-8 text-gray-500">Cargando...</td></tr>
               ) : filteredProducts.length === 0 ? (
-                <tr><td colSpan={6} className="text-center py-8 text-gray-500">No hay productos registrados.</td></tr>
+                <tr><td colSpan={7} className="text-center py-8 text-gray-500">No hay productos.</td></tr>
               ) : (
                 filteredProducts.map((product) => (
-                  <tr key={product.id} className="hover:bg-gray-50 transition-colors group">
+                  <tr 
+                    key={product.id} 
+                    className={`transition-colors group border-b last:border-none ${!product.estado ? 'bg-gray-100/80 grayscale-[0.8]' : 'hover:bg-gray-50'}`}
+                  >
                     <td className="px-6 py-4 font-mono text-gray-600">{product.codigo}</td>
                     
-                    {/* Nombre + Mini Imagen */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center overflow-hidden shrink-0">
@@ -117,7 +123,9 @@ export const ProductsPage = () => {
                                 <Package size={16} className="text-gray-400"/>
                              )}
                         </div>
-                        <span className="font-medium text-gray-900">{product.nombre}</span>
+                        <span className={`font-medium ${!product.estado ? 'text-gray-500 line-through' : 'text-gray-900'}`}>
+                            {product.nombre}
+                        </span>
                       </div>
                     </td>
 
@@ -134,36 +142,44 @@ export const ProductsPage = () => {
                         {product.stock} un.
                       </span>
                     </td>
+
+                    {/* 👇 AQUÍ VA LA CELDA DE ESTADO */}
+                    <td className="px-6 py-4 text-center">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border
+                            ${product.estado 
+                                ? "bg-green-50 text-green-700 border-green-200" 
+                                : "bg-red-50 text-red-700 border-red-200"
+                            }`}>
+                            <Activity size={12} />
+                            {product.estado ? "Activo" : "Inactivo"}
+                        </span>
+                    </td>
+
                     <td className="px-6 py-4 text-center">
                       <div className="flex justify-center gap-2">
-                        
-                        {/* 1. BOTÓN VER DETALLE (NUEVO) */}
                         <button 
                           onClick={() => { setProductToView(product); setIsViewOpen(true); }}
-                          className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
                           title="Ver detalle"
                         >
                           <Eye size={18} />
                         </button>
 
-                        {/* 2. EDITAR */}
                         <button 
                           onClick={() => { setProductToEdit(product); setIsModalOpen(true); }}
-                          className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                          className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg"
                           title="Editar"
                         >
                           <Edit size={18} />
                         </button>
 
-                        {/* 3. ELIMINAR */}
                         <button 
-                          onClick={() => { setProductToDelete(product.id); setIsConfirmOpen(true); }}
-                          className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Eliminar"
+                          onClick={() => { setProductToDelete(product); setIsConfirmOpen(true); }}
+                          className={`p-2 rounded-lg ${!product.estado ? "text-green-600 hover:bg-green-50" : "text-gray-500 hover:text-red-600 hover:bg-red-50"}`}
+                          title={!product.estado ? "Restaurar" : "Eliminar"}
                         >
-                          <Trash2 size={18} />
+                          {!product.estado ? <RefreshCw size={18} /> : <Trash2 size={18} />}
                         </button>
-
                       </div>
                     </td>
                   </tr>
@@ -174,7 +190,6 @@ export const ProductsPage = () => {
         </div>
       </div>
 
-      {/* Modales */}
       <ProductModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
@@ -185,13 +200,14 @@ export const ProductsPage = () => {
       <ConfirmModal 
         isOpen={isConfirmOpen}
         onClose={() => setIsConfirmOpen(false)}
-        onConfirm={handleDelete}
-        title="¿Eliminar Producto?"
-        message="Esta acción eliminará el producto del inventario permanentemente."
-        isDelete={true}
+        onConfirm={handleDeleteOrRestore}
+        title={productToDelete?.estado ? "¿Eliminar Producto?" : "¿Restaurar Producto?"}
+        message={productToDelete?.estado 
+            ? "El producto pasará a inactivos." 
+            : "El producto volverá a estar activo."}
+        isDelete={productToDelete?.estado}
       />
 
-      {/* 👇 AQUÍ RENDERIZAMOS EL NUEVO MODAL DE VISTA */}
       <ProductViewModal 
         isOpen={isViewOpen}
         onClose={() => setIsViewOpen(false)}
