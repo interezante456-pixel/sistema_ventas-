@@ -3,14 +3,14 @@ import bcrypt from 'bcryptjs';
 
 class UsersService {
     async getAll() {
-        console.log("📢 Buscando usuarios en la BD...");
+        //console.log("📢 Buscando usuarios en la BD...");
         
         const usuarios = await prisma.usuario.findMany({
             orderBy: { id: 'asc' }
         });
 
-        console.log(`✅ Encontrados: ${usuarios.length} usuarios`);
-        console.log(usuarios); // Muestra la lista en la consola negra
+        //console.log(`✅ Encontrados: ${usuarios.length} usuarios`);
+        //console.log(usuarios); // Muestra la lista en la consola negra
         
         return usuarios;
     }
@@ -42,9 +42,8 @@ class UsersService {
     }
 
     async delete(id: number) {
-        return await prisma.usuario.update({
+        return await prisma.usuario.delete({
             where: { id },
-            data: { estado: false },
         });
     }
 }
