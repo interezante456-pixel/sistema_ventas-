@@ -58,23 +58,38 @@ class ProductsController {
     async update(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const data: any = { ...req.body };
+            
+            // 👇 1. Creamos un objeto VACÍO para llenarlo solo con datos válidos
+            const dataToUpdate: any = {};
 
-            // Si hay nueva imagen, actualizamos la URL
-            if (req.file) {
-                data.imagenUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+            // 2. Asignamos campos de texto solo si existen
+            if (req.body.codigo) dataToUpdate.codigo = req.body.codigo;
+            if (req.body.nombre) dataToUpdate.nombre = req.body.nombre;
+            if (req.body.descripcion) dataToUpdate.descripcion = req.body.descripcion;
+
+            // 3. Parseamos números (Importante para evitar errores de tipo)
+            if (req.body.precioCompra) dataToUpdate.precioCompra = parseFloat(req.body.precioCompra);
+            if (req.body.precioVenta) dataToUpdate.precioVenta = parseFloat(req.body.precioVenta);
+            if (req.body.stock) dataToUpdate.stock = parseInt(req.body.stock);
+            if (req.body.categoriaId) dataToUpdate.categoriaId = parseInt(req.body.categoriaId);
+
+            // 4. Manejo del Estado (FormData envía 'true'/'false' como texto)
+            if (req.body.estado !== undefined) {
+                dataToUpdate.estado = String(req.body.estado) === 'true';
             }
 
-            // Conversiones necesarias
-            if (req.body.stock) data.stock = parseInt(req.body.stock);
-            if (req.body.categoriaId) data.categoriaId = parseInt(req.body.categoriaId);
-            if (req.body.precioCompra) data.precioCompra = parseFloat(req.body.precioCompra);
-            if (req.body.precioVenta) data.precioVenta = parseFloat(req.body.precioVenta);
+            // 👇 5. MAGIA: Si hay archivo, guardamos la URL. Si no, NO tocamos el campo.
+            if (req.file) {
+                dataToUpdate.imagenUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+            }
+            // NOTA: No hacemos nada con req.body.imagenUrl aquí, porque si no suben foto, 
+            // no queremos borrar la que ya existe.
 
-            const product = await productsService.update(Number(id), data);
+            const product = await productsService.update(Number(id), dataToUpdate);
             res.json(product);
         } catch (error: any) {
-            res.status(400).json({ error: error.message });
+            console.error(error);
+            res.status(400).json({ error: error.message || 'Error al actualizar producto' });
         }
     }
 
