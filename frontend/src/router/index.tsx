@@ -7,7 +7,7 @@ import { ProtectedRoute } from "./ProtectedRoute";
 import { DashboardPage } from "../features/dashboard/DashboardPage";
 import { PosPage } from "../features/pos/pages/PosPage";         // <--- OJO AQUÍ
 import { ProductsPage } from "../features/products/pages/ProductsPage"; // <--- OJO AQUÍ
-import { SalesHistory } from "../features/sales/pages/SalesHistory";   // <--- OJO AQUÍ
+import { SalesPage } from "../features/sales/pages/SalesPage";   // <--- OJO AQUÍ
 // import { UsersPage } from "../features/users/pages/UsersPage"; // Descomenta cuando crees la carpeta users
 import { UsersPage } from "../features/users/pages/UsersPage";
 
@@ -41,7 +41,7 @@ export const router = createBrowserRouter([
           },
           {
             path: "sales",       // Ruta: /sales (Historial)
-            element: <SalesHistory />,
+            element: <SalesPage />,
           },
           
            {
