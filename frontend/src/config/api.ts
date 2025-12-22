@@ -1,11 +1,8 @@
 import axios from 'axios';
-import { useAuthStore } from '@/store/auth.store'; 
+import { useAuthStore } from '@/store/auth.store';
 
 const api = axios.create({
   baseURL: 'http://localhost:4000/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
 // Interceptor: Antes de enviar la petición...
@@ -23,7 +20,7 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  
+
   return config;
 });
 

@@ -32,9 +32,17 @@ export class Server {
         this.app.use(cors());
         this.app.use(express.json());
 
+        // 👇 Aseguramos que la carpeta uploads exista
+        const uploadsDir = path.resolve('uploads');
+        const fs = require('fs');
+        if (!fs.existsSync(uploadsDir)) {
+            fs.mkdirSync(uploadsDir);
+            console.log(`📂 Carpeta 'uploads' creada en: ${uploadsDir}`);
+        }
+
         // 👇 ESTA ES LA LÍNEA NUEVA PARA QUE SE VEAN LAS FOTOS 👇
         // Le dice a Express: "Si te piden algo que empiece con /uploads, búscalo en la carpeta uploads de mi PC"
-        this.app.use('/uploads', express.static(path.resolve('uploads')));
+        this.app.use('/uploads', express.static(uploadsDir));
     }
 
     private routes() {
