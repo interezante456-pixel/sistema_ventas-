@@ -4,6 +4,11 @@ class CategoriesService {
     async getAll() {
         return await prisma.categoria.findMany({
             where: { estado: true },
+            include: {
+                _count: {
+                    select: { productos: true }
+                }
+            }
         });
     }
 
@@ -27,6 +32,11 @@ class CategoriesService {
     async getById(id: number) {
     return await prisma.categoria.findUnique({
         where: { id },
+        include: {
+                _count: {
+                    select: { productos: true }
+                }
+            }
     });
 }
 }
