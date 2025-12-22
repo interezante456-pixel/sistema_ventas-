@@ -58,7 +58,11 @@ class ProductsController {
     async update(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            
+            // 👇👇👇 AGREGA ESTOS LOGS DE DEPURACIÓN 👇👇👇
+            console.log("\n========================================");
+            console.log(`📡 PETICIÓN DE ACTUALIZAR RECIBIDA - ID: ${id}`);
+            console.log("📦 Body (Datos de texto):", req.body);
+            console.log("📂 Archivo (req.file):", req.file); //
             // 👇 1. Creamos un objeto VACÍO para llenarlo solo con datos válidos
             const dataToUpdate: any = {};
 
@@ -80,10 +84,19 @@ class ProductsController {
 
             // 👇 5. MAGIA: Si hay archivo, guardamos la URL. Si no, NO tocamos el campo.
             if (req.file) {
+                console.log("✅ ¡HAY IMAGEN! Procesando URL...");
                 dataToUpdate.imagenUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+                console.log("🔗 URL Generada:", dataToUpdate.imagenUrl);
+            }
+            else {
+                console.log("❌ NO HAY IMAGEN (req.file es undefined)");
+                console.log("   -> Motivo probable: Error en products.routes.ts (falta upload) o no enviaste archivo.");
             }
             // NOTA: No hacemos nada con req.body.imagenUrl aquí, porque si no suben foto, 
             // no queremos borrar la que ya existe.
+            console.log("💾 DATOS FINALES A GUARDAR EN BD:", dataToUpdate);
+            console.log("========================================\n");
+            // 👆👆👆 FIN DE LOGS 👆👆👆
 
             const product = await productsService.update(Number(id), dataToUpdate);
             res.json(product);

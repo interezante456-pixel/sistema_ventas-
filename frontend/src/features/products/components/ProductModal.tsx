@@ -85,6 +85,13 @@ export const ProductModal = ({ isOpen, onClose, onSuccess, productToEdit }: Prod
         // (o enviamos cadena vacía si no había nada)
         data.append('imagenUrl', formData.imagenUrl || '');
     }
+    // 👇👇 AGREGA ESTO PARA ESPIAR LOS DATOS EN LA CONSOLA 👇👇
+    console.log("--- 🕵️‍♂️ DATOS QUE SE ENVÍAN AL BACKEND ---");
+    for (let [key, value] of data.entries()) {
+        console.log(`${key}:`, value);
+    }
+    console.log("-------------------------------------------");
+    // 👆👆 FIN DEL CÓDIGO DE DEPURACIÓN 👆👆
 
     try {
       // ✅ Axios pone el Content-Type correcto automáticamente con FormData
