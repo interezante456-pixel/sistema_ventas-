@@ -34,9 +34,9 @@ export default function DashboardLayout() {
 
   const navItems = [
     { href: "/", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/sales", label: "Punto de Venta", icon: ShoppingCart },
+    { href: "/pos", label: "Punto de Venta", icon: ShoppingCart },
     { href: "/products", label: "Productos", icon: Package },
-    { href: "/", label: "Historial Ventas", icon: FileText },
+    { href: "/sales", label: "Historial Ventas", icon: FileText },
     { href: "/users", label: "Usuarios", icon: Users },
     { href: "/categories", label: "Categorías", icon: Package },
   ];
