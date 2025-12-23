@@ -15,9 +15,11 @@ datasource db {
 
 // 2. Enums (Tus listas de opciones fijas)
 enum Rol {
+  SUPER_ADMIN
   ADMIN
   VENDEDOR
   ALMACEN
+  CONTADOR
 }
 
 enum TipoComprobante {
@@ -89,17 +91,17 @@ model Proveedor {
 }
 
 model Producto {
-  id           Int     @id @default(autoincrement())
-  codigo       String  @unique
-  nombre       String
-  descripcion  String?
+  id          Int     @id @default(autoincrement())
+  codigo      String  @unique
+  nombre      String
+  descripcion String?
   imagenUrl   String?
-  
+
   precioCompra Decimal @db.Decimal(10, 2)
   precioVenta  Decimal @db.Decimal(10, 2)
   stock        Int
   estado       Boolean @default(true)
-  
+
   // Relaciones
   categoriaId Int
   categoria   Categoria @relation(fields: [categoriaId], references: [id])
@@ -149,13 +151,13 @@ model Venta {
   total           Decimal         @db.Decimal(10, 2)
 
   // 👇 AGREGA ESTA LÍNEA 👇
-  estado          String          @default("COMPLETADO")
-  
+  estado String @default("COMPLETADO")
+
   // 👇👇 AGREGA ESTAS DOS LÍNEAS 👇👇
-  metodoPago      MetodoPago @default(EFECTIVO) 
-  referencia      String?    // Para guardar N° Operación Yape o Tarjeta
+  metodoPago MetodoPago @default(EFECTIVO)
+  referencia String? // Para guardar N° Operación Yape o Tarjeta
   // 👆👆 FIN DE LO NUEVO 👆👆
-  
+
   clienteId Int?
   cliente   Cliente? @relation(fields: [clienteId], references: [id])
 
@@ -165,8 +167,6 @@ model Venta {
   detalles VentaDetalle[]
   pagos    Pago[]
 }
-
-
 
 model VentaDetalle {
   id        Int     @id @default(autoincrement())

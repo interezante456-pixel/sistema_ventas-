@@ -5,6 +5,7 @@ import categoryRoutes from '../modules/categories/categories.routes';
 import productRoutes from '../modules/products/products.routes';
 import saleRoutes from '../modules/sales/sales.routes';
 import clientRoutes from '../modules/clients/clients.routes';
+import dashboardRoutes from '../modules/dashboard/dashboard.routes';
 
 const router = Router();
 
@@ -13,6 +14,7 @@ router.use('/users', userRoutes);
 router.use('/categories', categoryRoutes);
 router.use('/products', productRoutes);
 router.use('/sales', saleRoutes);
-router.use('/clients', clientRoutes); 
+router.use('/clients', clientRoutes);
+router.use('/dashboard', dashboardRoutes);
 
 export default router;

@@ -1,13 +1,13 @@
 import { NavLink } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Users, 
-  Package, 
-  Tags, 
-  ShoppingCart, 
-  FileText, 
-  LogOut, 
-  UserCircle 
+import {
+  LayoutDashboard,
+  Users,
+  Package,
+  Tags,
+  ShoppingCart,
+  FileText,
+  LogOut,
+  UserCircle
 } from 'lucide-react';
 import { useAuthStore } from '../../store/auth.store';
 
@@ -16,14 +16,55 @@ export const Sidebar = () => {
   const user = useAuthStore(state => state.user);
 
   const menuItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Usuarios', path: '/users', icon: UserCircle },
-    { name: 'Clientes', path: '/clients', icon: Users }, // 👈 ¡NUEVO!
-    { name: 'Categorías', path: '/categories', icon: Tags },
-    { name: 'Productos', path: '/products', icon: Package },
-    { name: 'Punto de Venta', path: '/pos', icon: ShoppingCart },
-    { name: 'Historial Ventas', path: '/sales', icon: FileText },
+    {
+      name: 'Dashboard',
+      path: '/dashboard',
+      icon: LayoutDashboard,
+      allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'VENDEDOR', 'ALMACEN', 'CONTADOR']
+    },
+    {
+      name: 'Usuarios',
+      path: '/users',
+      icon: UserCircle,
+      allowedRoles: ['SUPER_ADMIN', 'ADMIN']
+    },
+    {
+      name: 'Clientes',
+      path: '/clients',
+      icon: Users,
+      allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'VENDEDOR']
+    },
+    {
+      name: 'Categorías',
+      path: '/categories',
+      icon: Tags,
+      allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'ALMACEN']
+    },
+    {
+      name: 'Productos',
+      path: '/products',
+      icon: Package,
+      allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'ALMACEN', 'VENDEDOR']
+    },
+    {
+      name: 'Punto de Venta',
+      path: '/pos',
+      icon: ShoppingCart,
+      allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'VENDEDOR']
+    },
+    {
+      name: 'Historial Ventas',
+      path: '/sales',
+      icon: FileText,
+      allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'VENDEDOR', 'CONTADOR']
+    },
   ];
+
+  const filteredMenuItems = menuItems.filter(item => {
+    if (!user) return false;
+    console.log(`Checking ${item.name} for role ${user.rol}. Allowed: ${item.allowedRoles}`);
+    return item.allowedRoles.includes(user.rol);
+  });
 
   return (
     <aside className="w-64 bg-gray-900 text-white min-h-screen flex flex-col transition-all duration-300">
@@ -36,15 +77,14 @@ export const Sidebar = () => {
 
       {/* Menú */}
       <nav className="flex-1 p-4 space-y-2">
-        {menuItems.map((item) => (
+        {filteredMenuItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive 
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' 
-                  : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50'
+                : 'text-gray-400 hover:bg-gray-800 hover:text-white'
               }`
             }
           >
@@ -65,8 +105,8 @@ export const Sidebar = () => {
             <p className="text-xs text-gray-500 truncate">{user?.rol}</p>
           </div>
         </div>
-        
-        <button 
+
+        <button
           onClick={logout}
           className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-900/20 rounded-lg transition-colors"
         >

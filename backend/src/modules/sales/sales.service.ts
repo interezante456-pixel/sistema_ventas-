@@ -21,8 +21,14 @@ interface CreateVentaInput {
 }
 
 class SalesService {
-    async getAll() {
+    async getAll(userId?: number) {
+        const whereClause: any = {};
+        if (userId) {
+            whereClause.usuarioId = userId;
+        }
+
         return await prisma.venta.findMany({
+            where: whereClause,
             include: {
                 cliente: true,
                 usuario: true,
@@ -54,7 +60,7 @@ class SalesService {
             // 1. Validar Stock ANTES de crear nada
             for (const item of data.detalles) {
                 const producto = await tx.producto.findUnique({ where: { id: item.productoId } });
-                
+
                 if (!producto) throw new Error(`Producto ${item.productoId} no existe`);
                 if (!producto.estado) throw new Error(`Producto ${producto.nombre} está desactivado`);
                 if (producto.stock < item.cantidad) {
@@ -124,7 +130,7 @@ class SalesService {
                     cliente: true,   // Necesario para nombre del cliente en ticket
                     usuario: true,
                     detalles: {
-                        include: { 
+                        include: {
                             producto: true // Necesario para nombres de productos en ticket
                         },
                     },

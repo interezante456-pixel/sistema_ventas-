@@ -4,7 +4,13 @@ import salesService from './sales.service';
 class SalesController {
     async getAll(req: Request, res: Response) {
         try {
-            const sales = await salesService.getAll();
+            const user = (req as any).user;
+            const role = user?.rol;
+            const userId = user?.id;
+
+            const filterUserId = (role === 'VENDEDOR') ? userId : undefined;
+
+            const sales = await salesService.getAll(filterUserId);
             res.json(sales);
         } catch (error: any) {
             res.status(500).json({ error: error.message });
@@ -24,9 +30,9 @@ class SalesController {
     async create(req: Request, res: Response) {
         try {
             // Asumimos que el middleware verifyToken agrega el usuario a req
-            const userId = (req as any).user.id; 
+            const userId = (req as any).user.id;
             const data = { ...req.body, usuarioId: userId };
-            
+
             const sale = await salesService.create(data);
             res.status(201).json(sale);
         } catch (error: any) {

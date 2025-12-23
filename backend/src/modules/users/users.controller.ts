@@ -41,6 +41,14 @@ class UsersController {
 
     async delete(req: Request, res: Response) {
         try {
+            // Verificamos que quien pide eliminar sea SUPER_ADMIN
+            // Asumimos que el middleware verifyToken populo (req as any).user
+            const currentUserRole = (req as any).user?.rol;
+
+            if (currentUserRole !== 'SUPER_ADMIN') {
+                return res.status(403).json({ error: 'Solo el Super Admin puede eliminar usuarios.' });
+            }
+
             await usersService.delete(Number(req.params.id));
             res.json({ message: 'User deleted successfully' });
         } catch (error: any) {
