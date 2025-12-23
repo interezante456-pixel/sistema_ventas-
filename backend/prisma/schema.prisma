@@ -151,6 +151,11 @@ model Venta {
   // 👇 AGREGA ESTA LÍNEA 👇
   estado          String          @default("COMPLETADO")
   
+  // 👇👇 AGREGA ESTAS DOS LÍNEAS 👇👇
+  metodoPago      MetodoPago @default(EFECTIVO) 
+  referencia      String?    // Para guardar N° Operación Yape o Tarjeta
+  // 👆👆 FIN DE LO NUEVO 👆👆
+  
   clienteId Int?
   cliente   Cliente? @relation(fields: [clienteId], references: [id])
 
@@ -160,6 +165,8 @@ model Venta {
   detalles VentaDetalle[]
   pagos    Pago[]
 }
+
+
 
 model VentaDetalle {
   id        Int     @id @default(autoincrement())

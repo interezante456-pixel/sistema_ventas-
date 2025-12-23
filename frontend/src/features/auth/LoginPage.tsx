@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../config/api';
-import { useAuthStore } from '@/store/auth.store';
+import { useAuthStore } from '@/store/auth.store'; // Asegúrate que esta ruta sea correcta
 
 export const LoginPage = () => {
   const [usuario, setUsuario] = useState('');
@@ -11,8 +11,8 @@ export const LoginPage = () => {
   
   const navigate = useNavigate();
   
-  // Accedemos a la acción del store para guardar el token en memoria
-  const setToken = useAuthStore((state: any) => state.setToken); 
+  // 👇 CORRECCIÓN 1: Usamos 'setAuth' que SÍ existe en tu store, en lugar de 'setToken'
+  const setAuth = useAuthStore(state => state.setAuth); 
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,24 +25,17 @@ export const LoginPage = () => {
         password
       });
 
-      // Asegúrate que tu backend devuelva { token: "...", user: { nombre: "...", rol: "..." } }
       const { token, user } = response.data;
       
-      console.log("Login exitoso. Datos usuario:", user); // 👈 Verifica aquí si sale el "nombre"
-
-      // 1. Guardar en el Store de Zustand (Estado global de la app)
-      if (setToken) {
-        setToken(token); 
-      }
+      // 👇 CORRECCIÓN 2: Guardamos en el Store usando la función correcta
+      // Esto actualiza Zustand y evita que el ProtectedRoute te bote
+      setAuth(token, user);
       
-      // 2. Guardar en LocalStorage (Persistencia y para leerlo en el Header)
+      // Guardamos también en LocalStorage por si acaso (para tu Header manual)
       localStorage.setItem('token', token);
-      
-      // 👇 ESTA LÍNEA ES LA CLAVE PARA EL HEADER:
-      // Guardamos todo el objeto usuario como texto.
       localStorage.setItem('user', JSON.stringify(user));
       
-      // 3. Redirigir al Dashboard
+      // Redirigir al Dashboard
       navigate('/');
       
     } catch (err: any) {

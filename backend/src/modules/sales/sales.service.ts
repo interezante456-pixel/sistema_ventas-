@@ -17,6 +17,7 @@ interface CreateVentaInput {
     detalles: VentaDetalleInput[];
     metodoPago: MetodoPago;
     montoPago: number;
+    referencia?: string; // 👈 NUEVO: Para guardar el N° Operación Yape/Tarjeta
 }
 
 class SalesService {
@@ -61,15 +62,17 @@ class SalesService {
                 }
             }
 
-            // 2. Crear Venta
+            // 2. Crear Venta (Cabecera)
             const venta = await tx.venta.create({
                 data: {
                     tipoComprobante: data.tipoComprobante,
                     total: data.total,
                     usuarioId: data.usuarioId,
                     clienteId: data.clienteId,
+                    metodoPago: data.metodoPago, // Guardamos método principal en cabecera
+                    referencia: data.referencia, // 👈 Guardamos la referencia (Yape/Tarjeta)
                     fechaVenta: new Date(),
-                    estado: 'COMPLETADO' // Nos aseguramos que nazca activa
+                    estado: 'COMPLETADO'
                 },
             });
 
@@ -103,16 +106,31 @@ class SalesService {
                 });
             }
 
-            // 4. Registrar Pago
+            // 4. Registrar Pago (Tabla de pagos separada)
             await tx.pago.create({
                 data: {
                     ventaId: venta.id,
                     metodoPago: data.metodoPago,
                     monto: data.montoPago,
+                    // Opcional: También guardarlo aquí si tu modelo Pago lo tiene
                 },
             });
 
-            return venta;
+            // 5. 🚀 CRÍTICO: Devolver la venta COMPLETA con relaciones
+            // Esto permite que el Frontend genere el PDF inmediatamente sin recargar.
+            return await tx.venta.findUnique({
+                where: { id: venta.id },
+                include: {
+                    cliente: true,   // Necesario para nombre del cliente en ticket
+                    usuario: true,
+                    detalles: {
+                        include: { 
+                            producto: true // Necesario para nombres de productos en ticket
+                        },
+                    },
+                    pagos: true,
+                },
+            });
         });
     }
 

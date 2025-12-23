@@ -1,14 +1,18 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
+import { useAuthStore } from '../store/auth.store';
+import type { ReactNode } from 'react'; // 👈 AGREGAMOS "type" AQUÍ
 
-export const ProtectedRoute = () => {
-  // Buscamos el token en el almacenamiento local
-  const token = localStorage.getItem('token');
+interface ProtectedRouteProps {
+  children: ReactNode;
+}
 
-  // Si NO hay token, redirigir al Login inmediatamente
-  if (!token) {
+export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+  // Usamos !!state.token para verificar si existe el token (true/false)
+  const isAuth = useAuthStore(state => !!state.token); 
+
+  if (!isAuth) {
     return <Navigate to="/login" replace />;
   }
 
-  // Si SÍ hay token, dejamos pasar al usuario (renderiza el contenido hijo)
-  return <Outlet />;
+  return <>{children}</>;
 };

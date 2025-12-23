@@ -1,63 +1,40 @@
-import { createBrowserRouter, Navigate } from "react-router-dom";
-import { LoginPage } from "../features/auth/LoginPage";
-import DashboardLayout from "../layouts/DashboardLayout";
-import { ProtectedRoute } from "./ProtectedRoute";
-
-// Importaciones adaptadas a tu estructura "features/modulo/pages/..."
-import { DashboardPage } from "../features/dashboard/DashboardPage";
-import { PosPage } from "../features/pos/pages/PosPage";         // <--- OJO AQUÍ
-import { ProductsPage } from "../features/products/pages/ProductsPage"; // <--- OJO AQUÍ
-import { SalesPage } from "../features/sales/pages/SalesPage";   // <--- OJO AQUÍ
-// import { UsersPage } from "../features/users/pages/UsersPage"; // Descomenta cuando crees la carpeta users
-import { UsersPage } from "../features/users/pages/UsersPage";
-
-
+import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { LoginPage } from '../features/auth/LoginPage';
+import { DashboardPage } from '../features/dashboard/DashboardPage';
+import { UsersPage } from '../features/users/pages/UsersPage';
 import { CategoriesPage } from '../features/categories/pages/CategoriesPage';
+import { ProductsPage } from '../features/products/pages/ProductsPage';
+import { PosPage } from '../features/pos/pages/PosPage';
+import { SalesPage } from '../features/sales/pages/SalesPage';
+import { ClientsPage } from '../features/clients/pages/ClientsPage'; // 👈 IMPORTAR ESTO
+
+import  {ProtectedRoute}  from '../router/ProtectedRoute';
+import DashboardLayout  from '../layouts/DashboardLayout';
 
 export const router = createBrowserRouter([
   {
-    path: "/login",
+    path: '/login',
     element: <LoginPage />,
   },
   {
-    element: <ProtectedRoute />,
+    path: '/',
+    element: <ProtectedRoute><DashboardLayout /></ProtectedRoute>,
     children: [
-      {
-        path: "/",
-        element: <DashboardLayout />,
-        children: [
-          {
-            index: true,
-            element: <DashboardPage />,
-          },
-          // Rutas hijas
-          {
-            path: "pos",         // Ruta: /pos
-            element: <PosPage />,
-          },
-          {
-            path: "products",    // Ruta: /products
-            element: <ProductsPage />,
-          },
-          {
-            path: "sales",       // Ruta: /sales (Historial)
-            element: <SalesPage />,
-          },
-          
-           {
-            path: "users",
-          element: <UsersPage />,
-          },
-          {
-            path: "categories",
-            element: <CategoriesPage />,
-          },
-        ]
-      }
-    ]
+      { index: true, element: <Navigate to="/dashboard" replace /> },
+      { path: 'dashboard', element: <DashboardPage /> },
+      { path: 'users', element: <UsersPage /> },
+      
+      // 👇 AGREGAR ESTA RUTA NUEVA
+      { path: 'clients', element: <ClientsPage /> },
+      
+      { path: 'categories', element: <CategoriesPage /> },
+      { path: 'products', element: <ProductsPage /> },
+      { path: 'pos', element: <PosPage /> },
+      { path: 'sales', element: <SalesPage /> },
+    ],
   },
   {
-    path: "*",
-    element: <Navigate to="/login" replace />,
-  }
+    path: '*',
+    element: <Navigate to="/" replace />,
+  },
 ]);

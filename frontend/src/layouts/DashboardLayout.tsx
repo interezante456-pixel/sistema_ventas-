@@ -8,7 +8,8 @@ import {
   Menu, 
   User, 
   FileText, 
-  Settings 
+  Settings,
+  Tags // 👈 Agregamos este ícono para categorías
 } from "lucide-react";
 import { useState } from "react";
 import { useAuthStore } from "@/store/auth.store"; 
@@ -32,13 +33,15 @@ export default function DashboardLayout() {
     navigate('/login');
   };
 
+  // 👇 LISTA DE NAVEGACIÓN ACTUALIZADA
   const navItems = [
-    { href: "/", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/pos", label: "Punto de Venta", icon: ShoppingCart },
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }, // Ajusté a /dashboard para ser más exacto
+    { href: "/users", label: "Usuarios", icon: User },      // Ícono singular para personal
+    { href: "/clients", label: "Clientes", icon: Users },   // 👈 NUEVO MÓDULO
+    { href: "/categories", label: "Categorías", icon: Tags }, // Ícono Tags para diferenciar
     { href: "/products", label: "Productos", icon: Package },
+    { href: "/pos", label: "Punto de Venta", icon: ShoppingCart },
     { href: "/sales", label: "Historial Ventas", icon: FileText },
-    { href: "/users", label: "Usuarios", icon: Users },
-    { href: "/categories", label: "Categorías", icon: Package },
   ];
 
   return (
@@ -56,9 +59,11 @@ export default function DashboardLayout() {
           </button>
         </div>
 
-        <nav className="flex-1 px-4 space-y-1 mt-4">
+        <nav className="flex-1 px-4 space-y-1 mt-4 overflow-y-auto">
           {navItems.map((item) => {
-            const isActive = location.pathname === item.href;
+            // Lógica para mantener activo el link incluso si estás en sub-rutas (ej: /products/new)
+            const isActive = location.pathname.startsWith(item.href);
+            
             return (
               <Link
                 key={item.href}
@@ -66,7 +71,7 @@ export default function DashboardLayout() {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                   isActive 
-                    ? "bg-blue-50 text-blue-700 font-medium" 
+                    ? "bg-blue-50 text-blue-700 font-medium shadow-sm ring-1 ring-blue-100" 
                     : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                 }`}
               >
@@ -99,24 +104,21 @@ export default function DashboardLayout() {
             </button>
 
             <h2 className="hidden md:block text-lg font-semibold text-gray-700 capitalize">
-                {navItems.find(i => i.href === location.pathname)?.label || 'Dashboard'}
+                {navItems.find(i => location.pathname.startsWith(i.href))?.label || 'Dashboard'}
             </h2>
 
-            {/* 👇 PERFIL (Nombre + Avatar) */}
+            {/* PERFIL (Nombre + Avatar) */}
             <div className="relative ml-auto">
                 
                 <button 
                     onClick={() => setIsProfileOpen(!isProfileOpen)}
-                    // Flex para alinear nombre y avatar horizontalmente
                     className="flex items-center gap-3 hover:bg-gray-50 p-2 rounded-lg transition-all outline-none"
                 >
-                    {/* 👇 AQUÍ ESTÁ EL NOMBRE QUE PEDISTE DEJAR 👇 */}
                     <div className="text-right hidden sm:block">
                         <p className="text-sm font-bold text-gray-800 leading-none">{user.nombre}</p>
                         <p className="text-xs text-gray-500 mt-1 uppercase font-semibold">{user.rol}</p>
                     </div>
 
-                    {/* El Avatar */}
                     <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 border border-blue-200 shadow-sm">
                         <User size={20} />
                     </div>
@@ -129,7 +131,6 @@ export default function DashboardLayout() {
 
                         <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-100 z-20 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                             
-                            {/* Cabecera interna del menú */}
                             <div className="px-4 py-3 border-b bg-gray-50">
                                 <p className="text-sm text-gray-500">Cuenta actual</p>
                                 <p className="text-sm font-bold text-gray-900 truncate">{user.nombre}</p>
@@ -137,25 +138,17 @@ export default function DashboardLayout() {
 
                             <div className="p-1">
                                 <button 
-                                    onClick={() => {
-                                        setIsProfileOpen(false);
-                                        // Futura navegación
-                                    }}
+                                    onClick={() => setIsProfileOpen(false)}
                                     className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md"
                                 >
-                                    <User size={16} />
-                                    Ver Perfil
+                                    <User size={16} /> Ver Perfil
                                 </button>
                                 
                                 <button 
-                                    onClick={() => {
-                                        setIsProfileOpen(false);
-                                        // Futura configuración
-                                    }}
+                                    onClick={() => setIsProfileOpen(false)}
                                     className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md"
                                 >
-                                    <Settings size={16} />
-                                    Configuración
+                                    <Settings size={16} /> Configuración
                                 </button>
                             </div>
 
@@ -164,8 +157,7 @@ export default function DashboardLayout() {
                                     onClick={handleLogout}
                                     className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md font-medium"
                                 >
-                                    <LogOut size={16} />
-                                    Cerrar Sesión
+                                    <LogOut size={16} /> Cerrar Sesión
                                 </button>
                             </div>
                         </div>
