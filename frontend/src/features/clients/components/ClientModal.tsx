@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { X, Save, User, Phone, MapPin, CreditCard } from 'lucide-react';
+import { X, Save, User, Phone, MapPin, CreditCard, Search } from 'lucide-react';
+import api from '../../../config/api';
 
 interface ClientModalProps {
   isOpen: boolean;
@@ -78,17 +79,49 @@ export const ClientModal = ({ isOpen, onClose, onSave, client }: ClientModalProp
                 </div>
             </div>
 
-            <div>
                 <label className="block text-sm font-bold text-gray-700 mb-1">DNI / RUC *</label>
-                <div className="relative">
-                    <CreditCard size={16} className="absolute left-3 top-3 text-gray-400"/>
-                    <input 
-                        type="text" className="w-full pl-9 border rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
-                        value={formData.dniRuc} onChange={e => setFormData({...formData, dniRuc: e.target.value})}
-                        placeholder="Ej: 77123456"
-                    />
+                <div className="flex gap-2">
+                    <div className="relative flex-1">
+                        <CreditCard size={16} className="absolute left-3 top-3 text-gray-400"/>
+                        <input 
+                            type="text" className="w-full pl-9 border rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
+                            value={formData.dniRuc} onChange={e => setFormData({...formData, dniRuc: e.target.value})}
+                            placeholder="Ej: 77123456"
+                            maxLength={11}
+                        />
+                    </div>
+                    <button 
+                        type="button"
+                        onClick={async () => {
+                            if (!formData.dniRuc || (formData.dniRuc.length !== 8 && formData.dniRuc.length !== 11)) {
+                                setError('Ingrese un DNI (8) o RUC (11) válido');
+                                return;
+                            }
+                            setError('');
+                            setLoading(true);
+                            try {
+                                const type = formData.dniRuc.length === 8 ? 'dni' : 'ruc';
+                                const { data } = await api.get(`/clients/consult/${type}/${formData.dniRuc}`);
+                                
+                                setFormData(prev => ({
+                                    ...prev,
+                                    nombres: data.nombres || '',
+                                    direccion: data.direccion || prev.direccion,
+                                    telefono: data.telefono || prev.telefono
+                                }));
+                            } catch (err: any) {
+                                console.error(err);
+                                setError(err.response?.data?.error || 'No se encontró información');
+                            } finally {
+                                setLoading(false);
+                            }
+                        }}
+                        className="bg-blue-100 text-blue-700 p-2.5 rounded-lg hover:bg-blue-200 transition-colors"
+                        title="Buscar datos en Reniec/Sunat"
+                    >
+                        <Search size={20} />
+                    </button>
                 </div>
-            </div>
 
             <div className="grid grid-cols-2 gap-4">
                 <div>

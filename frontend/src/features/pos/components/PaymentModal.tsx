@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, CreditCard, User, FileText, Banknote, Wallet, UserPlus, ArrowLeft } from 'lucide-react';
+import { X, CreditCard, User, FileText, Banknote, Wallet, UserPlus, ArrowLeft, Search } from 'lucide-react';
 import api from '../../../config/api';
 
 interface PaymentModalProps {
@@ -20,6 +20,7 @@ export const PaymentModal = ({ isOpen, onClose, onConfirm, total }: PaymentModal
   const [clientes, setClientes] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [searching, setSearching] = useState(false);
 
   // Estados para "Nuevo Cliente"
   const [isNewClientMode, setIsNewClientMode] = useState(false);
@@ -44,6 +45,31 @@ export const PaymentModal = ({ isOpen, onClose, onConfirm, total }: PaymentModal
           const { data } = await api.get('/clients');
           setClientes(data);
       } catch (err) { console.error("Error cargando clientes - Verifica que la ruta /clients exista en el backend"); }
+  };
+
+  const handleSearch = async () => {
+        if (!newClientData.dniRuc || (newClientData.dniRuc.length !== 8 && newClientData.dniRuc.length !== 11)) {
+            setError('Ingrese un DNI (8) o RUC (11) válido');
+            return;
+        }
+        setError('');
+        setSearching(true);
+        try {
+            const type = newClientData.dniRuc.length === 8 ? 'dni' : 'ruc';
+            const { data } = await api.get(`/clients/consult/${type}/${newClientData.dniRuc}`);
+            
+            setNewClientData(prev => ({
+                ...prev,
+                nombres: data.nombres || '',
+                direccion: data.direccion || prev.direccion,
+                telefono: data.telefono || prev.telefono
+            }));
+        } catch (err: any) {
+            console.error(err);
+            setError(err.response?.data?.error || 'No se encontró información');
+        } finally {
+            setSearching(false);
+        }
   };
 
   const handleCreateClient = async () => {
@@ -144,13 +170,25 @@ export const PaymentModal = ({ isOpen, onClose, onConfirm, total }: PaymentModal
 
                 {isNewClientMode ? (
                     <div className="space-y-3 animate-in slide-in-from-right-5">
-                        <div className="grid grid-cols-2 gap-3">
-                            <input 
-                                type="text" placeholder="DNI o RUC *"
-                                className="w-full border rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                                value={newClientData.dniRuc}
-                                onChange={e => setNewClientData({...newClientData, dniRuc: e.target.value})}
-                            />
+                        <div className="grid grid-cols-[2fr_1fr] gap-3"> 
+                            <div className="flex gap-2">
+                                <input 
+                                    type="text" placeholder="DNI o RUC *"
+                                    className="w-full border rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                                    value={newClientData.dniRuc}
+                                    onChange={e => setNewClientData({...newClientData, dniRuc: e.target.value})}
+                                    maxLength={11}
+                                />
+                                <button 
+                                    type="button"
+                                    onClick={handleSearch}
+                                    disabled={searching}
+                                    className="bg-blue-100 text-blue-700 p-2 rounded-lg hover:bg-blue-200 transition-colors"
+                                    title="Buscar"
+                                >
+                                    <Search size={18} />
+                                </button>
+                            </div>
                              <input 
                                 type="text" placeholder="Teléfono"
                                 className="w-full border rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
