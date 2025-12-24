@@ -7,6 +7,11 @@ import saleRoutes from '../modules/sales/sales.routes';
 import clientRoutes from '../modules/clients/clients.routes';
 import dashboardRoutes from '../modules/dashboard/dashboard.routes';
 
+import reportsRoutes from './reports.routes';
+import providerRoutes from '../modules/providers/providers.routes';
+import purchaseRoutes from '../modules/purchases/purchases.routes';
+import inventoryRoutes from '../modules/inventory/inventory.routes';
+
 const router = Router();
 
 router.use('/auth', authRoutes);
@@ -16,5 +21,9 @@ router.use('/products', productRoutes);
 router.use('/sales', saleRoutes);
 router.use('/clients', clientRoutes);
 router.use('/dashboard', dashboardRoutes);
+router.use('/reports', reportsRoutes);
+router.use('/providers', providerRoutes);
+router.use('/purchases', purchaseRoutes);
+router.use('/inventory', inventoryRoutes);
 
 export default router;

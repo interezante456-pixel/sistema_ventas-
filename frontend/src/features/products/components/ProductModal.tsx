@@ -42,7 +42,7 @@ export const ProductModal = ({ isOpen, onClose, onSuccess, productToEdit }: Prod
     } else {
       setFormData({ 
         codigo: '', nombre: '', descripcion: '', 
-        precioCompra: '', precioVenta: '', stock: '', 
+        precioCompra: '0', precioVenta: '', stock: '0', 
         categoriaId: '', imagenUrl: '' 
       });
       setPreviewUrl('');
@@ -203,19 +203,25 @@ export const ProductModal = ({ isOpen, onClose, onSuccess, productToEdit }: Prod
             </div>
           </div>
 
-          {/* Precios y Stock */}
+           {/* Precios y Stock */}
            <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1">P. Compra</label>
+            
+            {/* Si es NUEVO, ocultamos Costo y Stock (se envían como 0 internamente). 
+                Si es EDITAR, los mostramos pero BLOQUEADOS (solo lectura/referencia). */}
+            
+            <div className={productToEdit ? 'block' : 'hidden'}>
+              <label className="block text-xs font-bold text-gray-700 mb-1">Costo Ref.</label>
               <input 
-                type="number" step="0.01" required 
-                className="w-full border rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+                type="number" step="0.01" required={!!productToEdit}
+                disabled={true} // Siempre bloqueado, viene de Compras
+                className="w-full border rounded-lg py-2 px-3 text-sm bg-gray-100 text-gray-500 cursor-not-allowed outline-none border-gray-300" 
                 value={formData.precioCompra} 
                 onChange={e => setFormData({...formData, precioCompra: e.target.value})} 
                 placeholder="0.00"
               />
             </div>
-            <div>
+
+            <div className={productToEdit ? '' : 'col-span-3'}> {/* Si es nuevo, ocupa todo el ancho disponible */}
               <label className="block text-xs font-bold text-gray-700 mb-1">P. Venta</label>
               <input 
                 type="number" step="0.01" required 
@@ -223,17 +229,25 @@ export const ProductModal = ({ isOpen, onClose, onSuccess, productToEdit }: Prod
                 value={formData.precioVenta} 
                 onChange={e => setFormData({...formData, precioVenta: e.target.value})} 
                 placeholder="0.00"
+                autoFocus={!productToEdit} // Foco aquí al abrir si es nuevo
               />
             </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1">Stock</label>
-              <input 
-                type="number" required 
-                className="w-full border rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
-                value={formData.stock} 
-                onChange={e => setFormData({...formData, stock: e.target.value})} 
-                placeholder="0"
-              />
+
+            <div className={productToEdit ? 'block' : 'hidden'}>
+              <label className="block text-xs font-bold text-gray-700 mb-1">Stock Actual</label>
+              <div className="relative group/stock">
+                <input 
+                    type="number" required={!!productToEdit}
+                    disabled={true} // Siempre bloqueado
+                    className="w-full border rounded-lg py-2 px-3 text-sm outline-none bg-gray-100 text-gray-500 cursor-not-allowed" 
+                    value={formData.stock} 
+                    onChange={e => setFormData({...formData, stock: e.target.value})} 
+                    placeholder="0"
+                />
+                <div className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 group-hover/stock:opacity-100 transition-opacity pointer-events-none z-50">
+                    El stock se modifica mediante <b>Compras</b>.
+                </div>
+              </div>
             </div>
           </div>
 

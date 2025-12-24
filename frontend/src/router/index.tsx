@@ -6,7 +6,10 @@ import { CategoriesPage } from '../features/categories/pages/CategoriesPage';
 import { ProductsPage } from '../features/products/pages/ProductsPage';
 import { PosPage } from '../features/pos/pages/PosPage';
 import { SalesPage } from '../features/sales/pages/SalesPage';
-import { ClientsPage } from '../features/clients/pages/ClientsPage'; // 👈 IMPORTAR ESTO
+import { ClientsPage } from '../features/clients/pages/ClientsPage';
+import { ProvidersPage } from '../features/providers/pages/ProvidersPage';
+import { PurchasesPage } from '../features/purchases/pages/PurchasesPage';
+import { InventoryPage } from '../features/inventory/pages/InventoryPage';
 
 import  {ProtectedRoute}  from '../router/ProtectedRoute';
 import DashboardLayout  from '../layouts/DashboardLayout';
@@ -26,6 +29,9 @@ export const router = createBrowserRouter([
       
       // 👇 AGREGAR ESTA RUTA NUEVA
       { path: 'clients', element: <ClientsPage /> },
+      { path: 'providers', element: <ProvidersPage /> },
+      { path: 'purchases', element: <PurchasesPage /> },
+      { path: 'inventory', element: <InventoryPage /> },
       
       { path: 'categories', element: <CategoriesPage /> },
       { path: 'products', element: <ProductsPage /> },

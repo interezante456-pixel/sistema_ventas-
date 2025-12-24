@@ -5,9 +5,11 @@ import {
     Users,
     FileText,
     Tags,
-    User
+    User,
+    Truck,
+    ShoppingBag,
+    ClipboardList
 } from "lucide-react";
-import { useAuthStore } from "@/store/auth.store";
 
 export const useNavigation = () => {
     const userString = localStorage.getItem('user');
@@ -37,6 +39,24 @@ export const useNavigation = () => {
             label: "Categorías",
             icon: Tags,
             allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'ALMACEN']
+        },
+        {
+            href: "/providers",
+            label: "Proveedores",
+            icon: Truck,
+            allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'ALMACEN']
+        },
+        {
+            href: "/purchases",
+            label: "Compras",
+            icon: ShoppingBag,
+            allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'ALMACEN']
+        },
+        {
+            href: "/inventory",
+            label: "Kardex / Ajustes",
+            icon: ClipboardList,
+            allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'ALMACEN', 'CONTADOR']
         },
         {
             href: "/products",

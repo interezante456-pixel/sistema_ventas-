@@ -10,9 +10,16 @@ import { useNavigate } from "react-router-dom";
 import { useDashboardData } from "./hooks/useDashboardData";
 import { getLowStockItems } from "./services/dashboard.service";
 
+import { AccountantDashboard } from "./components/AccountantDashboard";
+
 export const DashboardPage = () => {
   const navigate = useNavigate();
   const { data, loading, error } = useDashboardData();
+
+  // Recuperar usuario para validar rol
+  const userString = localStorage.getItem('user');
+  const user = userString ? JSON.parse(userString) : null;
+  const isAccountant = user?.rol === 'CONTADOR';
 
   // Modal State
   const [isLowStockModalOpen, setIsLowStockModalOpen] = useState(false);
@@ -61,6 +68,11 @@ export const DashboardPage = () => {
         </button>
       </div>
     );
+  }
+
+  // 👇 VISTA ESPECIALIZADA PARA CONTADOR 👇
+  if (isAccountant) {
+    return <AccountantDashboard />;
   }
 
   return (

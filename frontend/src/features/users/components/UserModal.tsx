@@ -145,6 +145,7 @@ export const UserModal = ({ isOpen, onClose, onSuccess }: UserModalProps) => {
                 <option value="VENDEDOR">Vendedor</option>
                 <option value="ALMACEN">Almacenero</option>
                 <option value="ADMIN">Administrador</option>
+                <option value="CONTADOR">Contador</option>
               </select>
             </div>
           </div>
