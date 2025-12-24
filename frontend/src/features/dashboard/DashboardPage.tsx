@@ -11,6 +11,7 @@ import { useDashboardData } from "./hooks/useDashboardData";
 import { getLowStockItems } from "./services/dashboard.service";
 
 import { AccountantDashboard } from "./components/AccountantDashboard";
+import { ReportCenter } from "./components/ReportCenter";
 
 export const DashboardPage = () => {
   const navigate = useNavigate();
@@ -113,6 +114,10 @@ export const DashboardPage = () => {
           <RecentSalesTable sales={data.recentSales} />
         </div>
       </div>
+
+      {['SUPER_ADMIN', 'ADMIN'].includes(user?.rol) && (
+        <ReportCenter />
+      )}
 
       <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl p-6 text-white shadow-lg overflow-hidden relative">
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4">
