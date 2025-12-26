@@ -51,6 +51,17 @@ export const useClients = () => {
         }
     };
 
+    const toggleStatus = async (id: number, currentStatus: boolean) => {
+        try {
+            await api.patch(`/clients/${id}`, { estado: !currentStatus });
+            fetchClients();
+            setToast({ msg: `Cliente ${!currentStatus ? 'activado' : 'desactivado'} correctamente`, type: 'success' });
+        } catch (error) {
+            console.error(error);
+            setToast({ msg: 'Error al cambiar estado', type: 'error' });
+        }
+    };
+
     const filteredClients = clients.filter(c =>
         c.nombres.toLowerCase().includes(searchTerm.toLowerCase()) ||
         c.dniRuc.includes(searchTerm)
@@ -66,6 +77,7 @@ export const useClients = () => {
         setToast,
         fetchClients,
         handleSave,
-        handleDelete
+        handleDelete,
+        toggleStatus
     };
 };

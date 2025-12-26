@@ -1,44 +1,27 @@
-import { useState } from 'react';
 import { X, Save, ArrowUpRight, ArrowDownLeft, AlertTriangle } from 'lucide-react';
 import { useProducts } from '../../products/hooks/useProducts';
+import { useStockAdjustmentForm } from '../hooks/useStockAdjustmentForm';
 
 interface StockAdjustmentModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSuccess: (data: any) => Promise<any>; // Receive the registerAdjustment function
+    onSuccess: (data: any) => Promise<any>;
 }
 
 export const StockAdjustmentModal = ({ isOpen, onClose, onSuccess }: StockAdjustmentModalProps) => {
     const { products } = useProducts();
-    const [selectedProduct, setSelectedProduct] = useState<number | ''>('');
-    const [type, setType] = useState<'ENTRADA' | 'SALIDA'>('ENTRADA'); // Entrada is Adjustment +, Salida is Adjustment -
-    const [quantity, setQuantity] = useState('');
-    const [reason, setReason] = useState('');
-    const [loading, setLoading] = useState(false);
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!selectedProduct || !quantity || !reason) return;
-
-        setLoading(true);
-        const result = await onSuccess({
-            productoId: Number(selectedProduct),
-            tipo: type,
-            cantidad: Number(quantity),
-            motivo: reason
-        });
-        setLoading(false);
-
-        if (result.success) {
-            onClose();
-            // Reset form
-            setSelectedProduct('');
-            setQuantity('');
-            setReason('');
-        } else {
-            alert(result.error);
-        }
-    };
+    const {
+        selectedProduct,
+        setSelectedProduct,
+        type,
+        setType,
+        quantity,
+        setQuantity,
+        reason,
+        setReason,
+        loading,
+        handleSubmit
+    } = useStockAdjustmentForm({ onSuccess, onClose });
 
     if (!isOpen) return null;
 

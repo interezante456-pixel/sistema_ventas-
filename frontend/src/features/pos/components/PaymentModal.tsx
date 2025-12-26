@@ -28,7 +28,8 @@ export const PaymentModal = ({ isOpen, onClose, onConfirm, total }: PaymentModal
     nombres: '',
     dniRuc: '',
     telefono: '',
-    direccion: ''
+    direccion: '',
+    email: ''
   });
 
   useEffect(() => {
@@ -85,7 +86,9 @@ export const PaymentModal = ({ isOpen, onClose, onConfirm, total }: PaymentModal
           setClienteId(String(data.id));
           
           setIsNewClientMode(false);
-          setNewClientData({ nombres: '', dniRuc: '', telefono: '', direccion: '' });
+          setIsNewClientMode(false);
+          setNewClientData({ nombres: '', dniRuc: '', telefono: '', direccion: '', email: '' });
+          setError('');
           setError('');
           return data.id;
       } catch (err: any) {
@@ -207,6 +210,12 @@ export const PaymentModal = ({ isOpen, onClose, onConfirm, total }: PaymentModal
                             className="w-full border rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
                             value={newClientData.direccion}
                             onChange={e => setNewClientData({...newClientData, direccion: e.target.value})}
+                        />
+                         <input 
+                            type="email" placeholder="Email (Opcional)"
+                            className="w-full border rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                            value={newClientData.email}
+                            onChange={e => setNewClientData({...newClientData, email: e.target.value})}
                         />
                     </div>
                 ) : (

@@ -16,7 +16,7 @@ router.get('/consult/ruc/:ruc', consultasController.consultRuc.bind(consultasCon
 router.get('/', clientsController.getAll);
 router.get('/:id', clientsController.getById);
 router.post('/', clientsController.create);
-router.put('/:id', clientsController.update); // Changed from patch to put
+router.patch('/:id', clientsController.update);
 router.delete('/:id', clientsController.delete);
 
 export default router;

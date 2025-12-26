@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ClientModal } from '../components/ClientModal';
+import { ConfirmationModal } from '../components/ConfirmationModal';
 import { ToastNotification } from '../../users/components/ToastNotification';
 import { ClientsHeader } from '../components/ClientsHeader';
 import { ClientsFilters } from '../components/ClientsFilters';
@@ -16,12 +17,15 @@ export const ClientsPage = () => {
         toast, 
         setToast, 
         handleSave, 
-        handleDelete 
+        toggleStatus,
+        handleDelete
     } = useClients();
 
     // UI State
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [editingClient, setEditingClient] = useState<any>(null);
+    const [clientToDelete, setClientToDelete] = useState<number | null>(null);
 
     return (
         <div className="space-y-6">
@@ -45,10 +49,10 @@ export const ClientsPage = () => {
                     setEditingClient(client);
                     setIsModalOpen(true);
                 }}
+                onToggleStatus={toggleStatus}
                 onDelete={(id) => {
-                    if(confirm('¿Estás seguro de eliminar este cliente?')) {
-                        handleDelete(id);
-                    }
+                    setClientToDelete(id);
+                    setIsDeleteModalOpen(true);
                 }}
             />
 
@@ -63,6 +67,21 @@ export const ClientsPage = () => {
                    }
                 }}
                 client={editingClient}
+            />
+
+            <ConfirmationModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => {
+                    setIsDeleteModalOpen(false);
+                    setClientToDelete(null);
+                }}
+                onConfirm={() => {
+                    if (clientToDelete) {
+                        handleDelete(clientToDelete);
+                    }
+                }}
+                title="Eliminar Cliente"
+                message="¿Estás seguro de eliminar este cliente permanentemente? Esta acción no se puede deshacer."
             />
 
             {toast && (

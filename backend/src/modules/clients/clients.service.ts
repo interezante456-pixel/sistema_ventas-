@@ -2,10 +2,9 @@ import prisma from '../../config/prisma';
 
 class ClientsService {
     
-    // Obtener todos los clientes (activos)
+    // Obtener todos los clientes (activos e inactivos)
     async getAll() {
         return await prisma.cliente.findMany({
-            where: { estado: true },
             orderBy: { id: 'desc' } // Los más nuevos primero
         });
     }
@@ -32,6 +31,7 @@ class ClientsService {
                 dniRuc: data.dniRuc,
                 telefono: data.telefono,
                 direccion: data.direccion,
+                email: data.email,
                 estado: true
             }
         });
@@ -45,11 +45,10 @@ class ClientsService {
         });
     }
 
-    // Eliminar Cliente (Borrado lógico)
+    // Eliminar Cliente (Borrado físico)
     async delete(id: number) {
-        return await prisma.cliente.update({
-            where: { id },
-            data: { estado: false }
+        return await prisma.cliente.delete({
+            where: { id }
         });
     }
 }
