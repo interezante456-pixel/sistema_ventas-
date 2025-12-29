@@ -47,14 +47,14 @@ export const UserDropdown = ({ user }: UserDropdownProps) => {
 
                         <div className="p-1">
                             <button
-                                onClick={() => setIsOpen(false)}
+                                onClick={() => { setIsOpen(false); navigate('/profile'); }}
                                 className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md"
                             >
                                 <User size={16} /> Ver Perfil
                             </button>
 
                             <button
-                                onClick={() => setIsOpen(false)}
+                                onClick={() => { setIsOpen(false); navigate('/settings'); }}
                                 className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md"
                             >
                                 <Settings size={16} /> Configuración

@@ -23,9 +23,9 @@ const StatCard = ({ title, value, icon, colorClass }: StatCardProps) => (
 
 interface StatsGridProps {
     stats: {
-        salesToday: number;
-        ordersToday: number;
-        clientsTotal: number;
+        salesTotal: number;
+        ordersCount: number;
+        activeClients: number;
         lowStock: number;
     };
     onLowStockClick?: () => void;
@@ -34,22 +34,22 @@ interface StatsGridProps {
 export const StatsGrid = ({ stats, onLowStockClick }: StatsGridProps) => {
     const statItems = [
         {
-            title: "Ventas Hoy",
-            value: `S/ ${stats.salesToday.toFixed(2)}`,
+            title: "Ventas Totales",
+            value: `S/ ${Number(stats.salesTotal || 0).toFixed(2)}`,
             icon: <DollarSign className="w-6 h-6 text-emerald-600" />,
             colorClass: "bg-emerald-100",
             onClick: undefined
         },
         {
-            title: "Pedidos Hoy",
-            value: stats.ordersToday.toString(),
+            title: "Pedidos",
+            value: Number(stats.ordersCount || 0).toString(),
             icon: <ShoppingBag className="w-6 h-6 text-blue-600" />,
             colorClass: "bg-blue-100",
             onClick: undefined
         },
         {
-            title: "Clientes Nuevos",
-            value: stats.clientsTotal.toString(),
+            title: "Clientes Activos",
+            value: Number(stats.activeClients || 0).toString(),
             icon: <Users className="w-6 h-6 text-indigo-600" />,
             colorClass: "bg-indigo-100",
             onClick: undefined

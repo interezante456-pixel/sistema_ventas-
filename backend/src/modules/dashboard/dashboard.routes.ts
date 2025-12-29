@@ -4,9 +4,12 @@ import { verifyToken } from '../../middlewares/auth';
 
 const router = Router();
 
+// Routes for Dashboard module
+
 router.use(verifyToken);
 
 router.get('/', dashboardController.getData);
+router.get('/warehouse', dashboardController.getWarehouseData);
 router.get('/low-stock', dashboardController.getLowStockDetails);
 
 export default router;

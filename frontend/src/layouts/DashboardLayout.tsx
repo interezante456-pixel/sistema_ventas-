@@ -4,8 +4,10 @@ import { Sidebar } from "./components/Sidebar/Sidebar";
 import { Navbar } from "./components/Navbar/Navbar";
 import { MobileOverlay } from "./components/MobileOverlay";
 import { useNavigation } from "./hooks/useNavigation";
+import { useTheme } from "../hooks/useTheme";
 
 export default function DashboardLayout() {
+  useTheme(); // Inicializar Tema
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user } = useNavigation();
 

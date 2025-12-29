@@ -172,6 +172,7 @@ model VentaDetalle {
   id        Int     @id @default(autoincrement())
   cantidad  Int
   precio    Decimal @db.Decimal(10, 2)
+  costoUnitario Decimal @default(0) @db.Decimal(10, 2) // Costo histórico al momento de la venta
   descuento Decimal @default(0) @db.Decimal(10, 2)
   subtotal  Decimal @db.Decimal(10, 2)
 

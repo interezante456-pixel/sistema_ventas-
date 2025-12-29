@@ -11,6 +11,9 @@ import { ProvidersPage } from '../features/providers/pages/ProvidersPage';
 import { PurchasesPage } from '../features/purchases/pages/PurchasesPage';
 import { InventoryPage } from '../features/inventory/pages/InventoryPage';
 
+import { ProfilePage } from '../features/account/ProfilePage';
+import { SettingsPage } from '../features/account/SettingsPage';
+
 import  {ProtectedRoute}  from '../router/ProtectedRoute';
 import DashboardLayout  from '../layouts/DashboardLayout';
 
@@ -37,6 +40,10 @@ export const router = createBrowserRouter([
       { path: 'products', element: <ProductsPage /> },
       { path: 'pos', element: <PosPage /> },
       { path: 'sales', element: <SalesPage /> },
+      
+      // Feature: Account
+      { path: 'profile', element: <ProfilePage /> },
+      { path: 'settings', element: <SettingsPage /> },
     ],
   },
   {

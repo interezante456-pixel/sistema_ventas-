@@ -76,8 +76,41 @@ export const generateSaleTicketPdf = (sale: any): Blob => {
     yPos = drawLine(yPos);
 
     const total = Number(sale.total);
-    doc.setFontSize(10); doc.setFont("helvetica", "bold");
-    doc.text("TOTAL:", 35, yPos); rightText(`S/ ${total.toFixed(2)}`, yPos); yPos += 6;
+    const subtotal = total / 1.18;
+    const igv = total - subtotal;
+
+    // Subtotal y IGV
+    doc.setFontSize(9); doc.setFont("helvetica", "normal");
+    rightText(`Subtotal: S/ ${subtotal.toFixed(2)}`, yPos); yPos += 4;
+    rightText(`IGV (18%): S/ ${igv.toFixed(2)}`, yPos); yPos += 4;
+
+    yPos = drawLine(yPos);
+
+    // Total
+    doc.setFontSize(12); doc.setFont("helvetica", "bold");
+    doc.text("TOTAL:", MARGIN, yPos + 2); 
+    rightText(`S/ ${total.toFixed(2)}`, yPos + 2); 
+    yPos += 8;
+
+    // Pagó con y Vuelto (Si existe data de pago)
+    if (sale.montoPago) {
+        const montoPago = Number(sale.montoPago);
+        const vuelto = Math.max(0, montoPago - total);
+        
+        doc.setFontSize(9); doc.setFont("helvetica", "normal");
+        
+        doc.text("Pagó con:", MARGIN, yPos); 
+        rightText(`S/ ${montoPago.toFixed(2)}`, yPos); 
+        yPos += 5;
+
+        if (vuelto > 0) {
+            doc.text("Vuelto:", MARGIN, yPos); 
+            rightText(`S/ ${vuelto.toFixed(2)}`, yPos); 
+            yPos += 6;
+        } else {
+             yPos += 2;
+        }
+    }
 
     centerText("¡Gracias por su compra!", yPos);
 

@@ -84,12 +84,20 @@ class SalesService {
 
             // 3. Crear Detalles y Mover Stock
             for (const item of data.detalles) {
+                // Obtenemos costo actual (lo volvemos a buscar dentro de la tx para asegurar consistencia,
+                // aunque ya validamos stock arriba, el precioCompra podría haber cambiado)
+                const producto = await tx.producto.findUnique({
+                    where: { id: item.productoId },
+                    select: { precioCompra: true }
+                });
+
                 await tx.ventaDetalle.create({
                     data: {
                         ventaId: venta.id,
                         productoId: item.productoId,
                         cantidad: item.cantidad,
                         precio: item.precio,
+                        costoUnitario: producto?.precioCompra || 0, // 👈 Guardamos costo histórico
                         descuento: item.descuento || 0,
                         subtotal: item.subtotal,
                     },

@@ -2,12 +2,18 @@ import axios from '../../../config/api';
 
 export interface DashboardData {
     stats: {
-        salesToday: number;
-        ordersToday: number;
-        clientsTotal: number;
+        salesTotal: number;
+        ordersCount: number;
+        activeClients: number;
         lowStock: number;
+        totalPurchases: number;
+        netProfit: number;
     };
     salesTrend: Array<{
+        name: string;
+        ventas: number;
+    }>;
+    yearlySales: Array<{
         name: string;
         ventas: number;
     }>;
@@ -29,8 +35,35 @@ export interface DashboardData {
     }>;
 }
 
-export const getDashboardData = async (): Promise<DashboardData> => {
-    const response = await axios.get('/dashboard');
+export interface WarehouseData {
+    totalValue: number;
+    totalProducts: number;
+    criticalStock: number;
+    movementsToday: number;
+    movementsTrend: Array<{ name: string; Entrada: number; Salida: number }>;
+    categoryStats: Array<{ name: string; value: number }>;
+    recentMovements: Array<{
+        id: number;
+        product: string;
+        type: 'ENTRADA' | 'SALIDA' | 'AJUSTE';
+        quantity: number;
+        date: string;
+        reason: string;
+    }>;
+}
+
+export const getDashboardData = async (month?: number, year?: number, viewUserId?: number): Promise<DashboardData> => {
+    const params: any = {};
+    if (month !== undefined && month !== null) params.month = month;
+    if (year) params.year = year;
+    if (viewUserId) params.viewUserId = viewUserId;
+
+    const response = await axios.get('/dashboard', { params });
+    return response.data;
+};
+
+export const getWarehouseDashboardData = async (): Promise<WarehouseData> => {
+    const response = await axios.get('/dashboard/warehouse');
     return response.data;
 };
 
